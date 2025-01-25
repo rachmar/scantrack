@@ -8,7 +8,7 @@
       @include('partials.styles')
    </head>
    <body>
-      <div id="wrapper">
+      <div>
          @yield('content')
          @include('partials.scripts')  
       </div>
