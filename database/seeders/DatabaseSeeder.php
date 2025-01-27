@@ -6,9 +6,9 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Student;
-use Hash;
-use Spatie\Permission\Traits\HasRoles;
-use DB;
+use App\Models\Visitor;
+use Faker\Factory as Faker;
+
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -31,26 +31,31 @@ class DatabaseSeeder extends Seeder
 
         $user->roles()->sync($role->id);
 
-        Student::create([
-            'card_id' => 'CARD123456',
-            'first_name' => 'John',
-            'last_name' => 'Doe',
-            'email' => 'johndoe@example.com',
-            'phone' => '1234567890',
-            'course' => 'Computer Science',
-            'address' => '123 Main St, Anytown, USA',
-            'image' => 'student1.jpg',
-        ]);
+        $faker = Faker::create();
 
-        Student::create([
-            'card_id' => 'CARD654321',
-            'first_name' => 'Jane',
-            'last_name' => 'Smith',
-            'email' => 'janesmith@example.com',
-            'phone' => '9876543210',
-            'course' => 'Information Technology',
-            'address' => '456 Elm St, Othercity, USA',
-            'image' => 'student2.jpg',
-        ]);
+        // Create 40 Students
+        for ($i = 1; $i <= 40; $i++) {
+            Student::create([
+                'card_id' => 'CARD' . $faker->unique()->numberBetween(100000, 999999),
+                'first_name' => $faker->firstName,
+                'last_name' => $faker->lastName,
+                'email' => $faker->unique()->safeEmail,
+                'phone' => $faker->phoneNumber,
+                'image' => 'student1.jpg',
+            ]);
+        }
+
+        // Create 20 Visitors
+        for ($i = 1; $i <= 20; $i++) {
+            Visitor::create([
+                'card_id' => 'CARD' . $faker->unique()->numberBetween(100000, 999999),
+                'first_name' => $faker->firstName,
+                'last_name' => $faker->lastName,
+                'email' => $faker->unique()->safeEmail,
+                'phone' => $faker->phoneNumber,
+                'purpose' => $faker->randomElement(['Get School Diploma', 'Admission Inquiry', 'Visit Friend', 'Attend Seminar']),
+            ]);
+        }
+
     }
 }

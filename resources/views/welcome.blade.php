@@ -60,7 +60,7 @@
            </div>
            <form class="form-container">
                <div class="mb-3">
-                   <label for="id" class="form-label text-white">Student ID / Visitor ID</label>
+                   <label for="id" class="form-label text-white">Scan ID</label>
                    <input type="text" class="form-control" id="student_id" disabled>
                </div>
                <div class="row mb-3">
@@ -84,14 +84,10 @@
                    </div>
                </div>
                <div class="mb-3">
-                   <label for="course" class="form-label text-white">Course / Event</label>
+                   <label for="purpose" class="form-label text-white">Purpose</label>
                    <div class="input-group">
-                       <input type="text" class="form-control" id="course" disabled>
+                       <textarea type="text" class="form-control" id="purpose" disabled rows="3" />
                    </div>
-               </div>
-               <div class="mb-3">
-                   <label for="address" class="form-label text-white">Address</label>
-                   <input type="text" class="form-control" id="address" disabled>
                </div>
            </form>
        `);
@@ -123,22 +119,28 @@
                    $('#lastName').val(response.last_name);
                    $('#email').val(response.email);
                    $('#phone').val(response.phone);
-                   $('#course').val(response.course);
-                   $('#address').val(response.address);
-                   const baseUrl = window.location.origin; // Get the base URL dynamically
-                   const profileImageUrl = `${baseUrl}/assets/images/${response.image}` || `${baseUrl}/assets/images/student1.jpg`;
-                   $('.profile-image').attr('src', profileImageUrl);
+
+                   if (response.image) {
+                        const baseUrl = window.location.origin; // Get the base URL dynamically
+                        const profileImageUrl = `${baseUrl}/assets/images/${response.image}` || `${baseUrl}/assets/images/student1.jpg`;
+                        $('.profile-image').attr('src', profileImageUrl);
+                   }
+
+                   if (response.purpose) {
+                        $('#purpose').val(response.purpose);
+                   }
+
+                   setTimeout(resetForm, 5000); // 30 seconds (30000 milliseconds)
                },
                error: function (error) {
                    console.error('Error processing scan:', error);
                    // On error, disable the form fields and show the error message
                    $('#userDetails').html(`
-                       <h1 class="text-center text-white">
+                       <h3 class="text-center text-white">
                            <p>${error.responseJSON.message}</p>
-                       </h1>
+                       </h3>
                    `); // Show the error message inside the form
                    
-                   // Revert the form after 30 seconds
                    setTimeout(resetForm, 5000); // 30 seconds (30000 milliseconds)
                },
                complete: function () {
