@@ -51,7 +51,7 @@ class DatabaseSeeder extends Seeder
             $abbreviation = $matches[1];
         
             Course::create([
-                'slug' => Str::slug($abbreviation),
+                'slug' => strtoupper(Str::slug($abbreviation)),
                 'name' => $course,
             ]);
         }
@@ -75,31 +75,39 @@ class DatabaseSeeder extends Seeder
         }  
 
          // Fetch all student IDs
-         $studentIds = Student::pluck('id')->toArray();
+        $studentIds = Student::pluck('id')->toArray();
 
-         // Define the date range
-         $startDate = Carbon::create(2024, 9, 1);
-         $endDate = Carbon::create(2025, 2, 28);
- 
-         // Generate attendance data
-         while ($startDate->lte($endDate)) {
-             // Skip Sundays
-             if (!$startDate->isSunday()) {
-                 // Create attendance for 1-5 random students per day
-                 $studentsPerDay = $faker->numberBetween(1, 100);
- 
-                 for ($i = 0; $i < $studentsPerDay; $i++) {
-                     StudentAttendance::create([
-                         'student_id' => $faker->randomElement($studentIds),
-                         'created_at' => $startDate->toDateTimeString(),
-                         'updated_at' => $startDate->toDateTimeString(),
-                     ]);
-                 }
-             }
- 
-             // Move to the next day
-             $startDate->addDay();
-         }
+        // Define the date range
+        $startDate = Carbon::create(2024, 9, 1);
+        $endDate = Carbon::create(2025, 2, 28);
+
+        // Generate attendance data
+        while ($startDate->lte($endDate)) {
+            // Skip Sundays
+            if (!$startDate->isSunday()) {
+                // Create attendance for 1-5 random students per day
+                $studentsPerDay = $faker->numberBetween(1, 100);
+                for ($i = 0; $i < $studentsPerDay; $i++) {
+                    $studentId = $faker->randomElement($studentIds);
+
+                    // Check if attendance already exists for the student on this date
+                    $attendanceExists = StudentAttendance::where('student_id', $studentId)
+                                                        ->whereDate('created_at', $startDate->toDateString())
+                                                        ->exists();
+
+                    if (!$attendanceExists) {
+                        // Create the attendance record if it doesn't exist
+                        StudentAttendance::create([
+                            'student_id' => $studentId,
+                            'created_at' => $startDate->toDateTimeString(),
+                            'updated_at' => $startDate->toDateTimeString(),
+                        ]);
+                    }
+                }
+            }
+            // Move to the next day
+            $startDate->addDay();
+        }
 
 
 

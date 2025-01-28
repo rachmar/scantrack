@@ -7,21 +7,21 @@
             <li class="menu-title">Main</li>
             <li class="">
                <a href="{{route('admin')}}" class="waves-effect {{ request()->is("admin") || request()->is("admin/*") ? "mm active" : "" }}">
-               <i class="ti-home"></i><span class="badge badge-primary badge-pill float-right">2</span> <span> Dashboard </span>
+               <i class="ti-home"></i> <span> Dashboard </span>
                </a>
             </li>
             <li>
-               <a href="javascript:void(0);" class="waves-effect"><i class="ti-user"></i><span> Employees <span class="float-right menu-arrow"><i class="mdi mdi-chevron-right"></i></span> </span></a>
-               <ul class="submenu">
-                  <li>
-                     <a href="/employees" class="waves-effect {{ request()->is("employees") || request()->is("/employees/*") ? "mm active" : "" }}"><i class="dripicons-view-apps"></i><span>Employees List</span></a>
-                  </li>
-               </ul>
+               <a href="/students" class="waves-effect {{ request()->is("students") || request()->is("/students/*") ? "mm active" : "" }}"><i class="ti-user"></i><span>Students</span></a>
             </li>
             <li class="menu-title">Management</li>
             <li class="">
-               <a href="/schedule" class="waves-effect {{ request()->is("schedule") || request()->is("schedule/*") ? "mm active" : "" }}">
-               <i class="ti-time"></i> <span> Schedule </span>
+               <a href="/school-reports" class="waves-effect {{ request()->is("school-reports") || request()->is("school-reports/*") ? "mm active" : "" }}">
+                  <i class="ti-time"></i> <span> School Reports </span>
+               </a>
+            </li>
+            <li class="">
+               <a href="/student-reports" class="waves-effect {{ request()->is("student-reports") || request()->is("student-reports/*") ? "mm active" : "" }}">
+                  <i class="ti-time"></i> <span> Student Reports </span>
                </a>
             </li>
          </ul>

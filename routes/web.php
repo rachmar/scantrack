@@ -9,8 +9,9 @@ Route::get('/', function () {
 })->name('welcome');
 
 Route::post('/process', '\App\Http\Controllers\ScanController@show')->name('process.show');
-Route::get('/reports', '\App\Http\Controllers\ReportController@reports')->name('reports');
 
 Route::group(['middleware' => ['auth', 'auth.roles'], 'roles' => ['admin']], function () {
     Route::get('/admin', '\App\Http\Controllers\DashboardController@index')->name('admin');
+    Route::get('/school-reports', '\App\Http\Controllers\ReportController@schoolReports')->name('school.reports');
+    Route::get('/student-reports', '\App\Http\Controllers\ReportController@studentReports')->name('student.reports');
 });
