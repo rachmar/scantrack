@@ -20,8 +20,7 @@ class Visitor extends Model
         'last_name',
         'email',
         'phone',
-        'image',
-        'purpose',
+        'image'
     ];
 
     /**

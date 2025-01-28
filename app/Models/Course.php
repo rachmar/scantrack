@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Role extends Model
-{   
+class Course extends Model
+{
+    use HasFactory;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -16,8 +19,11 @@ class Role extends Model
         'name',
     ];
 
-    public function users()
+    
+    // Relationship with students
+    public function students()
     {
-        return $this->belongsToMany('App\Models\User', 'user_roles', 'role_id', 'user_id');
+        return $this->hasMany(Student::class);
     }
+
 }

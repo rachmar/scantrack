@@ -14,15 +14,24 @@ class CreateStudentsTable extends Migration
     public function up()
     {
         Schema::create('students', function (Blueprint $table) {
-            $table->id();
-            $table->string('card_id')->unique(); 
+            $table->id(); // Primary key
+            $table->string('card_id')->unique();
+            $table->unsignedBigInteger('course_id'); // Ensure it's unsignedBigInteger for foreign key
             $table->string('first_name');
             $table->string('last_name');
             $table->string('email')->unique();
             $table->string('phone');
             $table->text('image');
             $table->timestamps();
+        
+            // Foreign key constraint
+            $table->foreign('course_id')
+                  ->references('id')
+                  ->on('courses')
+                  ->onDelete('cascade');
         });
+        
+        
     }
 
     /**

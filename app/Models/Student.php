@@ -16,12 +16,14 @@ class Student extends Model
      */
     protected $fillable = [
         'card_id',
+        'course_id',
         'first_name',
         'last_name',
         'email',
         'phone',
         'image',
     ];
+
 
     /**
      * Get the masked email.
