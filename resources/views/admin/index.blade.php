@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('css')
+@section('styles')
 @endsection
 
 @section('breadcrumb')
@@ -14,48 +14,37 @@
 
 @section('content')
 <div class="row">
-    <div class="col-xl-3 col-md-6">
-        <div class="card mini-stat bg-primary text-white">
+    <div class="col-xl-3 col-md-6 d-flex">
+        <div class="card mini-stat bg-primary text-white flex-fill">
             <div class="card-body">
                 <div class="mb-4">
                     <div class="float-left mini-stat-img mr-4">
-                        <span class="ti-id-badge" style="font-size: 20px"></span>
+                        <i class="fas fa-user-check fa-2x"></i>
                     </div>
-                    <h5 class="font-16 text-uppercase mt-0 text-white-50">Total <br> Employees</h5>
-                    <h4 class="font-500">1</h4>
-                    <span class="ti-user" style="font-size: 71px"></span>
-                </div>
-                <div class="pt-2">
-                    <div class="float-right">
-                        <a href="#" class="text-white-50"><i class="mdi mdi-arrow-right h5"></i></a>
-                    </div>
-                    <p class="text-white-50 mb-0">More info</p>
+                    <h5 class="font-16 text-uppercase mt-0 text-white">Total Students Present</h5>
+                    <h4 class="font-500">{{ $studentsPresentToday }}</h4>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="card mini-stat bg-primary text-white">
-            <div class="card-body">
-                <div class="mb-4">
-                    <div class="float-left mini-stat-img mr-4">
-                        <span class="ti-id-badge" style="font-size: 20px"></span>
+    @foreach($studentsPresentTodayByCourse as $course)
+        <div class="col-xl-3 col-md-6 d-flex">
+            <div class="card mini-stat bg-primary text-white flex-fill">
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="float-left mini-stat-img mr-4">
+                            <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                        </div>
+                        <h5 class="font-16 text-uppercase mt-0 text-white">{{ $course->course_name }}</h5>
+                        <h4 class="font-500">{{ $course->attendance_count }}</h4>
                     </div>
-                    <h5 class="font-16 text-uppercase mt-0 text-white-50">Total <br> Employees</h5>
-                    <h4 class="font-500">1</h4>
-                    <span class="ti-user" style="font-size: 71px"></span>
-                </div>
-                <div class="pt-2">
-                    <div class="float-right">
-                        <a href="#" class="text-white-50"><i class="mdi mdi-arrow-right h5"></i></a>
-                    </div>
-                    <p class="text-white-50 mb-0">More info</p>
                 </div>
             </div>
         </div>
-    </div>
+    @endforeach
 </div>
+
 @endsection
 
-@section('script')
+@section('scripts')
 @endsection

@@ -1,11 +1,11 @@
 @extends('layouts.master')
 
-@section('css')
+@section('styles')
 @endsection
 
 @section('breadcrumb')
 <div class="col-sm-6 text-left" >
-     <h4 class="page-title mb-3">Overall School Report</h4>
+     <h4 class="page-title mb-2">Overall School Report</h4>
      <form method="GET" action="{{ route('school.reports') }}" class="mb-4">
         @php
             $startDate = request()->get('start_date', \Carbon\Carbon::now()->toDateString());
@@ -21,7 +21,6 @@
                 <label for="end_date" class="form-label">End Date:</label>
                 <input type="date" id="end_date" name="end_date" class="form-control" value="{{ $endDate }}">
             </div>
-
             <div class="col-md-4 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100">Filter</button>
             </div>
@@ -37,7 +36,7 @@
             <div class="card-body">
                 <div class="mb-4">
                     <div class="float-left mini-stat-img mr-4">
-                        <span class="ti-check-box"></span>
+                        <i class="fas fa-user-check fa-2x"></i>
                     </div>
                     <h5 class="font-16 text-uppercase mt-0 text-white">Total Students Present</h5>
                     <h4 class="font-500">{{ $studentsPresentToday }}</h4>
@@ -45,14 +44,13 @@
             </div>
         </div>
     </div>
-
     @foreach($studentsPresentTodayByCourse as $course)
         <div class="col-xl-3 col-md-6 d-flex">
             <div class="card mini-stat bg-primary text-white flex-fill">
                 <div class="card-body">
                     <div class="mb-4">
                         <div class="float-left mini-stat-img mr-4">
-                            <span class="ti-check-box"></span>
+                            <i class="fas fa-chalkboard-teacher fa-2x"></i>
                         </div>
                         <h5 class="font-16 text-uppercase mt-0 text-white">{{ $course->course_name }}</h5>
                         <h4 class="font-500">{{ $course->attendance_count }}</h4>

@@ -181,28 +181,43 @@ class ReportController extends Controller
         // Check if the student is present today
         $isPresentToday = $studentAttendanceToday ? true : false;
 
-        // Fetch daily attendance data for a specific student, grouped by user_id and optionally filtered by date range
-        $attendanceQuery = DB::table("student_attendances")
-        ->selectRaw("DATE(created_at) as date, COUNT(*) as count")
+       // Fetch attendance data for a specific student
+        $dailyAttendanceQuery = DB::table("student_attendances")
+        ->selectRaw("DATE(created_at) as date, COUNT(*) as count") // Group by date
         ->where("student_attendances.student_id", $student->id ?? 0) // Filter by specific student ID
-        ->groupBy("date"); // Group by both date and user_id
+        ->whereBetween("created_at", [$startDate, $endDate]) // Apply date range filter
+        ->groupBy("date")
+        ->orderBy("date");
 
-        // Apply date range filter if provided
-        $attendanceQuery->whereBetween("created_at", [$startDate, $endDate]);
-
-        $attendance = $attendanceQuery->get();
+        $dailyAttendance = $dailyAttendanceQuery->get();
 
         // Prepare Daily Attendance Data for Chart.js
-        $attendanceLabels = $attendance->pluck("date")->toArray(); // Dates
-        $attendanceValues = $attendance->pluck("count")->toArray(); // Counts
-
-
-        $attendanceEvents = array_map(function ($date, $value) {
+        $dailyLabels = $dailyAttendance->pluck("date")->toArray(); // Dates (e.g., '2025-01-01')
+        $dailyValues = $dailyAttendance->pluck("count")->toArray(); // Counts for each date
+        
+        $dailyAttendanceEvents = array_map(function ($date, $value) {
             return [
-                'title' => "Present",
+                'title' => "Present: $value",
                 'start' => $date,
             ];
-        }, $attendanceLabels, $attendanceValues);
+        }, $dailyLabels, $dailyValues);
+
+        // Fetch monthly attendance data
+        $monthlyAttendanceQuery = DB::table("student_attendances")
+        ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count") // Group by month
+        ->where("student_attendances.student_id", $student->id ?? 0) // Filter by specific student ID
+        ->whereBetween("created_at", [$startDate, $endDate]) // Apply date range filter
+        ->groupBy("month")
+        ->orderBy("month");
+
+        $monthlyAttendance = $monthlyAttendanceQuery->get();
+
+        // Prepare Monthly Attendance Data for Chart.js
+        $monthlyLabels = $monthlyAttendance->pluck("month")->map(function ($month) {
+        return date("M", strtotime($month)); // Convert 'YYYY-MM' to 'Mon' (e.g., '2025-01' to 'Jan')
+        })->toArray();
+        $monthlyValues = $monthlyAttendance->pluck("count")->toArray(); // Counts for each month
+
 
         return view(
             "admin.student_reports",
@@ -210,9 +225,9 @@ class ReportController extends Controller
                 "student",
                 "isPresentToday",
                 "numofStudentAttendance",
-                "attendanceLabels",
-                "attendanceValues",
-                "attendanceEvents"
+                "dailyAttendanceEvents",
+                "monthlyLabels",
+                "monthlyValues"
             )
         );
 

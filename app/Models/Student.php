@@ -24,6 +24,15 @@ class Student extends Model
         'image',
     ];
 
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
+    public function fullName()
+    {
+        return $this->first_name.' '.$this->last_name;
+    }
 
     /**
      * Get the masked email.

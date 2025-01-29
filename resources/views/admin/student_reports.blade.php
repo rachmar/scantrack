@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('css')
+@section('styles')
 @endsection
 
 @section('breadcrumb')
@@ -34,68 +34,68 @@
 
 @section('content')
 <div class="row">
-    <div class="col-xl-3 col-md-6 d-flex">
-        <div class="card mini-stat  text-white flex-fill {{ $isPresentToday  ? 'bg-success' : 'bg-danger' }}">
-            <div class="card-body">
-                <div class="mb-4">
-                    <div class="float-left mini-stat-img mr-4">
-                        <span class="ti-check-box"></span>
-                    </div>
-                    <h5 class="font-16 text-uppercase mt-0 text-white">Present Today?</h5>
-                    <p class="font-500">
-                        {{ $isPresentToday == 'Yes' ? 'YES' : 'NO' }}
-                    </p>
-                </div>
+   <div class="col-xl-6">
+      <div class="card">
+         <div class="card-body">
+            @if (isset($student->id))
+                <h4 class="mt-0 header-title mb-4">Name: {{$student->fullName()}} |  {{$student->course->name}} </h4>
+            @endif
+            <div class="row">
+               <div class="col-lg-6 d-flex">
+                  <div class="card mini-stat  text-white flex-fill {{ $isPresentToday  ? 'bg-success' : 'bg-danger' }}">
+                     <div class="card-body">
+                        <div class="mb-4">
+                           <div class="float-left mini-stat-img mr-4">
+                              <span class="ti-check-box"></span>
+                           </div>
+                           <h5 class="font-16 text-uppercase mt-0 text-white">Present Today?</h5>
+                           <p class="font-500">
+                              {{ $isPresentToday == 'Yes' ? 'YES' : 'NO' }}
+                           </p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-lg-6 d-flex">
+                  <div class="card mini-stat bg-primary text-white flex-fill">
+                     <div class="card-body">
+                        <div class="mb-4">
+                           <div class="float-left mini-stat-img mr-4">
+                              <span class="ti-check-box"></span>
+                           </div>
+                           <h5 class="font-16 text-uppercase mt-0 text-white">Total Student Attendance</h5>
+                           <h4 class="font-500">{{ $numofStudentAttendance }}</h4>
+                        </div>
+                     </div>
+                  </div>
+               </div>
             </div>
-        </div>
-    </div>
-    <div class="col-xl-3 col-md-6 d-flex">
-        <div class="card mini-stat bg-primary text-white flex-fill">
-            <div class="card-body">
-                <div class="mb-4">
-                    <div class="float-left mini-stat-img mr-4">
-                        <span class="ti-check-box"></span>
-                    </div>
-                    <h5 class="font-16 text-uppercase mt-0 text-white">Total Student Attendance</h5>
-                    <h4 class="font-500">{{ $numofStudentAttendance }}</h4>
-                </div>
+            <h4 class="mt-0 header-title">Student Attendance Logs</h4>
+            <div class="row">
+               <div class="col-lg-12">
+                  <canvas id="dailyAttendanceChart"></canvas>
+               </div>
             </div>
-        </div>
-    </div>
+         </div>
+      </div>
+   </div>
+   <div class="col-lg-6">
+      <div class="card">
+         <div class="card-body">
+            <div class="row">
+               <div class="col-lg-12">
+                  <div id="attendanceCalendar"></div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
 </div>
-
-<div class="row">
-    <div class="col-xl-12">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="mt-0 header-title">List of Student Attendance</h4>
-                <div class="row">
-                    <div class="col-lg-8 offset-lg-2">
-                        <canvas id="dailyAttendanceChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="row">
-    <div class="col-xl-12">
-        <div class="card">
-            <div class="card-body">
-                <div id="attendanceCalendar"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
 @endsection
 
 @section('scripts')
 <script src="{{ URL::asset('assets/js/chart.min.js') }}"></script>
 <script src="{{ URL::asset('assets/js/fullcalendar.min.js') }}"></script>
-
 <script>
    
 
@@ -107,7 +107,7 @@
         // Initialize FullCalendar
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            events: @json($attendanceEvents), // Use the attendance events from the controller
+            events: @json($dailyAttendanceEvents), // Use the attendance events from the controller
         });
 
         calendar.render();
@@ -123,17 +123,17 @@
         }
 
         // Generate an array of random border colors
-        const backgroundColors = @json($attendanceLabels).map(() => getRandomColor());
-        const borderColors = @json($attendanceLabels).map(() => getRandomColor());
+        const backgroundColors = @json($monthlyLabels).map(() => getRandomColor());
+        const borderColors = @json($monthlyLabels).map(() => getRandomColor());
 
         var dailyAttendanceCtx = document.getElementById('dailyAttendanceChart').getContext('2d');
         var dailyAttendanceChart = new Chart(dailyAttendanceCtx, {
         type: 'bar',
             data: {
-                labels: @json($attendanceLabels),
+                labels: @json($monthlyLabels),
                 datasets: [{
                     label: 'Attendance Count',
-                    data: @json($attendanceValues),
+                    data: @json($monthlyValues),
                     backgroundColor: backgroundColors,  // Assuming backgroundColors is defined somewhere
                     borderColor: borderColors,
                     fill: true,
