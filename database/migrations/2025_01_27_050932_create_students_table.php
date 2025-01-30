@@ -22,8 +22,8 @@ class CreateStudentsTable extends Migration
             $table->string('email')->unique();
             $table->string('phone');
             $table->text('image');
+            $table->text('schedule');
             $table->timestamps();
-        
             // Foreign key constraint
             $table->foreign('course_id')
                   ->references('id')

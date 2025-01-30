@@ -14,7 +14,7 @@
         <div class="row">
             <div class="col-md-3">
                 <label for="student_id" class="form-label">Student ID:</label>
-                <input type="text" id="student_id" name="student_id" class="form-control" value="ST677485">
+                <input type="text" id="student_id" name="student_id" class="form-control" value="ST109188">
             </div>
             <div class="col-md-3">
                 <label for="start_date" class="form-label">Start Date:</label>
@@ -38,7 +38,8 @@
       <div class="card">
          <div class="card-body">
             @if (isset($student->id))
-                <h4 class="mt-0 header-title mb-4">Name: {{$student->fullName()}} |  {{$student->course->name}} </h4>
+                <h4 class="mt-0 header-title">Name: {{$student->fullName()}} |  {{$student->course->name}} </h4>
+                <h3 class="mt-0 header-title mb-4">Schedule: {{$student->mappedSchedule()}}</h3>
             @endif
             <div class="row">
                <div class="col-lg-6 d-flex">
@@ -56,6 +57,20 @@
                      </div>
                   </div>
                </div>
+               
+               <div class="col-lg-6 d-flex">
+                  <div class="card mini-stat bg-primary text-white flex-fill">
+                     <div class="card-body">
+                        <div class="mb-4">
+                           <div class="float-left mini-stat-img mr-4">
+                              <span class="ti-check-box"></span>
+                           </div>
+                           <h5 class="font-16 text-uppercase mt-0 text-white">Total Student School Days</h5>
+                           <h4 class="font-500">{{ $numOfSchoolDays }}</h4>
+                        </div>
+                     </div>
+                  </div>
+               </div>
                <div class="col-lg-6 d-flex">
                   <div class="card mini-stat bg-primary text-white flex-fill">
                      <div class="card-body">
@@ -64,7 +79,20 @@
                               <span class="ti-check-box"></span>
                            </div>
                            <h5 class="font-16 text-uppercase mt-0 text-white">Total Student Attendance</h5>
-                           <h4 class="font-500">{{ $numofStudentAttendance }}</h4>
+                           <h4 class="font-500">{{ $numOfStudentAttendance }}</h4>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-lg-6 d-flex">
+                  <div class="card mini-stat bg-primary text-white flex-fill">
+                     <div class="card-body">
+                        <div class="mb-4">
+                           <div class="float-left mini-stat-img mr-4">
+                              <span class="ti-check-box"></span>
+                           </div>
+                           <h5 class="font-16 text-uppercase mt-0 text-white">Total Student Absent</h5>
+                           <h4 class="font-500">{{ $numOfAbsences }}</h4>
                         </div>
                      </div>
                   </div>
@@ -104,11 +132,15 @@
     document.addEventListener('DOMContentLoaded', function () {
         var calendarEl = document.getElementById('attendanceCalendar');
 
-        // Initialize FullCalendar
-        var calendar = new FullCalendar.Calendar(calendarEl, {
+         // Initialize FullCalendar
+         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            events: @json($dailyAttendanceEvents), // Use the attendance events from the controller
-        });
+            events: [
+               ...@json($dailyAttendanceEvents), // Use the attendance events from the controller
+               ...@json($absenceEvents), // Use the absence events from the controller
+               ...@json($holidayEvents) // Use the absence events from the controller
+            ],
+         });
 
         calendar.render();
 

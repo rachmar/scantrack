@@ -29,6 +29,7 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Course</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,6 +40,9 @@
                             <td>{{$student->phone}}</td>
                             <td>{{$student->email}}</td>
                             <td>{{$student->course->name ?? 'No Course'}}</td>
+                            <td>
+                                <a href="{{ route('students.show', $student) }}" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-download'></i> Download QR</a>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>

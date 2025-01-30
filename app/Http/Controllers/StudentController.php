@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use Illuminate\Http\Request;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Response;
+
 
 class StudentController extends Controller
 {
@@ -37,6 +40,7 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         //
+        
     }
 
     /**
@@ -45,9 +49,14 @@ class StudentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
-        //
+    public function show(Student $student)
+    {   
+        $filename = $student->fullName().'.svg';
+        $qrcode = QrCode::size(300)->generate($student->card_id);
+        return Response::make($qrcode, 200, [
+            'Content-Type' => 'image/svg',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+        ]);
     }
 
     /**

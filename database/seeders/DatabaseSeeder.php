@@ -61,8 +61,28 @@ class DatabaseSeeder extends Seeder
         // Fetch all course IDs
         $courseIds = Course::pluck('id')->toArray();
 
-        // Create 100 Students
+        // Define available days (excluding Sunday)
+        $dayMap = [
+            'M'  => 1, // Monday
+            'T'  => 2, // Tuesday
+            'W'  => 3, // Wednesday
+            'TH' => 4, // Thursday
+            'F'  => 5, // Friday
+            'S'  => 6, // Saturday
+        ];
+
+        $dayKeys = array_keys($dayMap); // Get only the keys like ['M', 'T', 'W', 'TH', 'F', 'S']
+
+        // Create 500 Students
         for ($i = 1; $i <= 500; $i++) {
+            $scheduleCount = rand(3, 5); // Ensure at least 3 and at most 5 days
+            $schedule = $faker->randomElements($dayKeys, $scheduleCount); // Select random days
+
+            // Sort schedule based on day order defined in $dayMap
+            usort($schedule, function ($a, $b) use ($dayMap) {
+                return $dayMap[$a] - $dayMap[$b];
+            });
+
             Student::create([
                 'card_id' => 'ST' . $faker->unique()->numberBetween(100000, 999999),
                 'course_id' => $faker->randomElement($courseIds), // Assign random course ID
@@ -71,44 +91,73 @@ class DatabaseSeeder extends Seeder
                 'email' => $faker->unique()->safeEmail,
                 'phone' => $faker->phoneNumber,
                 'image' => 'blank.jpg',
+                'schedule' => $schedule, // Store sorted schedule as a comma-separated string
             ]);
-        }  
+        }
 
-         // Fetch all student IDs
-        $studentIds = Student::pluck('id')->toArray();
+        // Fetch all student IDs with their schedules
+        $students = Student::select('id', 'schedule')->get()->keyBy('id')->toArray();
 
         // Define the date range
         $startDate = Carbon::create(2024, 9, 1);
         $endDate = Carbon::create(2025, 2, 28);
 
-        // Generate attendance data
+        // Day map for checking attendance days
+        $dayMap = [
+            1 => 'M',  // Monday
+            2 => 'T',  // Tuesday
+            3 => 'W',  // Wednesday
+            4 => 'TH', // Thursday
+            5 => 'F',  // Friday
+            6 => 'S',  // Saturday
+        ];
+
+        // Track absences per student per week
+        $weeklyAbsences = [];
+
         while ($startDate->lte($endDate)) {
-            // Skip Sundays
             if (!$startDate->isSunday()) {
-                // Create attendance for 1-5 random students per day
-                $studentsPerDay = $faker->numberBetween(1, 100);
-                for ($i = 0; $i < $studentsPerDay; $i++) {
-                    $studentId = $faker->randomElement($studentIds);
+                $dayCode = $dayMap[$startDate->dayOfWeek] ?? null; // Get day code (M, T, W, etc.)
+                
+                if ($dayCode) {
+                    $currentWeek = $startDate->copy()->startOfWeek()->toDateString(); // Identify the week
+                    
+                    foreach ($students as $studentId => $student) {
+                        $studentSchedule = $student['schedule'] ; // Convert schedule to array
 
-                    // Check if attendance already exists for the student on this date
-                    $attendanceExists = StudentAttendance::where('student_id', $studentId)
-                                                        ->whereDate('created_at', $startDate->toDateString())
-                                                        ->exists();
+                        // If the student is scheduled for this day
+                        if (in_array($dayCode, $studentSchedule)) {
+                            // Initialize weekly absence tracking
+                            if (!isset($weeklyAbsences[$studentId][$currentWeek])) {
+                                $weeklyAbsences[$studentId][$currentWeek] = 0;
+                            }
 
-                    if (!$attendanceExists) {
-                        // Create the attendance record if it doesn't exist
-                        StudentAttendance::create([
-                            'student_id' => $studentId,
-                            'created_at' => $startDate->toDateTimeString(),
-                            'updated_at' => $startDate->toDateTimeString(),
-                        ]);
+                            // Decide if the student should be absent (only if they haven't been absent this week)
+                            $isAbsent = ($weeklyAbsences[$studentId][$currentWeek] == 0 && rand(1, 10) > 8); // 20% chance
+
+                            if ($isAbsent) {
+                                $weeklyAbsences[$studentId][$currentWeek]++; // Mark as absent for this week
+                            } else {
+                                // Ensure attendance is not duplicated
+                                $attendanceExists = StudentAttendance::where('student_id', $studentId)
+                                    ->whereDate('created_at', $startDate->toDateString())
+                                    ->exists();
+
+                                if (!$attendanceExists) {
+                                    // Create the attendance record
+                                    StudentAttendance::create([
+                                        'student_id' => $studentId,
+                                        'created_at' => $startDate->toDateTimeString(),
+                                        'updated_at' => $startDate->toDateTimeString(),
+                                    ]);
+                                }
+                            }
+                        }
                     }
                 }
             }
-            // Move to the next day
-            $startDate->addDay();
+            $startDate->addDay(); // Move to the next day
         }
-
 
 
 

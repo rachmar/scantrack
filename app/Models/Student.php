@@ -22,6 +22,11 @@ class Student extends Model
         'email',
         'phone',
         'image',
+        'schedule'
+    ];
+
+    protected $casts = [
+        'schedule' => 'array'
     ];
 
     public function course()
@@ -33,6 +38,24 @@ class Student extends Model
     {
         return $this->first_name.' '.$this->last_name;
     }
+    public function mappedSchedule()
+    {
+        $days = [
+            'M' => 'Monday',
+            'T' => 'Tuesday',
+            'W' => 'Wednesday',
+            'Th' => 'Thursday',
+            'F' => 'Friday',
+            'S' => 'Saturday',
+        ];
+    
+        $mappedSchedule = array_map(function ($day) use ($days) {
+            return $days[$day] ?? $day;
+        }, $this->schedule);
+    
+        return implode(', ', $mappedSchedule);
+    }
+    
 
     /**
      * Get the masked email.
