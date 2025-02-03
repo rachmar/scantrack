@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Course extends Model
+class Department extends Model
 {
     use HasFactory;
 
@@ -17,19 +17,5 @@ class Course extends Model
     protected $fillable = [
         'slug',
         'name',
-        'department_id'
     ];
-
-    
-    // Relationship with students
-    public function students()
-    {
-        return $this->hasMany(Student::class);
-    }
-
-    public function department()
-    {
-        return $this->belongsTo(Department::class);
-    }
-
 }

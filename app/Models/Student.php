@@ -40,22 +40,8 @@ class Student extends Model
     }
     public function mappedSchedule()
     {
-        $days = [
-            'M' => 'Monday',
-            'T' => 'Tuesday',
-            'W' => 'Wednesday',
-            'TH' => 'Thursday',
-            'F' => 'Friday',
-            'S' => 'Saturday',
-        ];
-    
-        $mappedSchedule = array_map(function ($day) use ($days) {
-            return $days[$day] ?? $day;
-        }, $this->schedule);
-    
-        return implode(', ', $mappedSchedule);
+        return implode(' ', $this->schedule);
     }
-    
 
     /**
      * Get the masked email.

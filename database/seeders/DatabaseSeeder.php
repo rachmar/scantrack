@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Course;
+use App\Models\Department;
 use App\Models\Holiday;
 use Illuminate\Database\Seeder;
 use App\Models\User;
@@ -37,25 +38,52 @@ class DatabaseSeeder extends Seeder
         $user->roles()->sync($role->id);
 
         $courses = [
-            "Bachelor of Science in Nursing (BSN)",
-            "Bachelor of Science in Information Technology (BSIT)",
-            "Bachelor of Science in Psychology (BSPsych)",
-            "Bachelor of Science in Accountancy (BSA)",
-            "Bachelor of Science in Education (BSEd)",
-            "Bachelor of Science in Hospitality Management (BSHM)",
+            "ASBME" => [
+                "Bachelor of Science in Psychology (BSPsych)",
+                "Bachelor of Science in Business Administration (BSBA)",
+                "Bachelor of Science in Information Technology (BSIT)",
+                "Bachelor of Science in Secondary Education (BSED)",
+                "Bachelor of Science in Elementary Education (BEED)",
+                "Bachelor of Science in Hospitality Management (BSHM)",
+            ],
+            "AH" => [
+                "Bachelor of Science in Pharmacy (BSPh)",
+                "Bachelor of Science in Medical Technology (BSMT)",
+            ],
+            "BED" => [
+                "Junior High (JH)",
+                "Senior High (SH)",
+            ],
+            "NURSING" => [
+                "Bachelor of Science in Nursing (BSN)",
+            ],
+            "MEDICINE" => [
+                "Bachelor of Science in Medicine (BSM)",
+            ]
         ];
-
-        // Seed courses
-        foreach ($courses as $course) {
-            // Extract the abbreviation (e.g., BSN, BSIT) from the course name
-            preg_match("/\((.*?)\)/", $course, $matches);
-            $abbreviation = $matches[1];
-
-            Course::create([
-                "slug" => strtoupper(Str::slug($abbreviation)),
-                "name" => $course,
+        
+        // Seed departments and courses
+        foreach ($courses as $departmentName => $departmentCourses) {
+            // Create department
+            $department = Department::create([
+                'name' => $departmentName,
+                'slug' => strtoupper(Str::slug($departmentName)),
             ]);
+        
+            foreach ($departmentCourses as $course) {
+                // Extract the abbreviation (e.g., BSN, BSIT) from the course name
+                preg_match("/\((.*?)\)/", $course, $matches);
+                $abbreviation = $matches[1];
+        
+                // Create course associated with the department
+                Course::create([
+                    'slug' => strtoupper(Str::slug($abbreviation)),
+                    'name' => $course,
+                    'department_id' => $department->id, // Associate course with the department
+                ]);
+            }
         }
+        
 
         $events = [
             ["name" => "Event 1", "date" => Carbon::create(2025, 1, 14)],

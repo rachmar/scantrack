@@ -194,6 +194,8 @@ class ReportController extends Controller
         $numOfStudentAttendance = count($studentAttendance);
         $numOfAbsences = $numOfSchoolDays - $numOfStudentAttendance;
 
+        $absenteeismRate = round((($numOfAbsences / $numOfSchoolDays) * 100), 2);
+
         // Check if the student is present today
         $isPresentToday = isset($studentAttendance[Carbon::today()->toDateString()]);
 
@@ -216,7 +218,10 @@ class ReportController extends Controller
                 "absenceEvents",
                 "dailyAttendanceEvents",
                 "holidayEvents",
-                "studentAttendanceTable"
+                "studentAttendanceTable",
+                "startDate",
+                "endDate",
+                "absenteeismRate"
             )
         );
     }
