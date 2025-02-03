@@ -16,6 +16,7 @@ class CreateStudentAttendancesTable extends Migration
         Schema::create('student_attendances', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('student_id');
+            $table->enum('status', ['IN', 'OUT']);
             $table->timestamps();
         
             // Foreign key constraint

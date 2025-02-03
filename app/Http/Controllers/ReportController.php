@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Holiday;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -146,13 +147,13 @@ class ReportController extends Controller
 
 
     public function studentReports(Request $request)
-    {   
-        // Get today's date for both start and end date
-        $startDate = $request->get("start_date", Carbon::today()->toDateString());
-        $endDate = $request->get("end_date", Carbon::today()->toDateString());
+    {
+        // Get today's date for both start and end date, default to whole month if not provided
+        $startDate = $request->get("start_date", Carbon::today()->startOfMonth()->toDateString());
+        $endDate = $request->get("end_date", Carbon::today()->endOfMonth()->toDateString());
 
         // Fetch student record
-        $student = Student::where('card_id', $request->student_id)->first();
+        $student = Student::where('card_id', $request->student_id)->first() ?? Student::first();
 
         // Convert student's schedule into an array
         $scheduleDays = $student->schedule ?? [];
@@ -167,127 +168,42 @@ class ReportController extends Controller
             'S'  => 6,  // Saturday
         ];
 
-        // Define the holiday array
-        $holidays = [
-            "2025-01-14" => 'Event 1',
-            "2025-01-15" => 'Event 2',
-        ];
+        // Fetch holidays within the date range
+        $holidays = Holiday::whereBetween('date', [$startDate, $endDate])
+            ->pluck('name', 'date')
+            ->toArray();
 
         // Get all valid scheduled dates for the student within the date range
-        $scheduledDates = [];
-        $currentDate = Carbon::parse($startDate);
-
-        while ($currentDate->lte($endDate)) {
-            // Get the day number for the current date (1=Monday, 2=Tuesday, etc.)
-            $dayNumber = $currentDate->dayOfWeek; 
-
-            // Adjust to the correct value since Carbon's dayOfWeek starts from 0 (Sunday)
-            // Convert day number to match the student's schedule (e.g., 0 = Sunday, 1 = Monday)
-            $dayNumber = ($dayNumber == 0) ? 7 : $dayNumber;
-
-            // Check if this day is in the student's schedule
-            if (in_array(array_search($dayNumber, $dayMap), $scheduleDays)) {
-                // Exclude the date if it's a holiday
-                if (!isset($holidays[$currentDate->toDateString()])) {
-                    $scheduledDates[] = $currentDate->toDateString();
-                }
-            }
-
-            // Move to the next day
-            $currentDate->addDay();
-        }
+        $scheduledDates = $this->getScheduledDates($startDate, $endDate, $scheduleDays, $dayMap, $holidays);
 
         // Calculate number of school days based on the schedule
         $numOfSchoolDays = count($scheduledDates);
 
-        // Get total attendance count within the range
-        $studentAttendance = DB::table("student_attendances")
-        ->where("student_attendances.student_id", $student->id)
-        ->whereBetween("student_attendances.created_at", [$startDate, $endDate])
-        ->pluck("created_at")
-        ->map(function ($date) {
-            return Carbon::parse($date)->toDateString();
-        })
-        ->toArray();
+        // Define the common query logic for attendance
+        $attendanceQuery = DB::table("student_attendances")
+            ->where("student_attendances.student_id", $student->id)
+            ->whereBetween("student_attendances.created_at", [$startDate, $endDate]);
 
-        // Exclude holidays from the attendance list
-        $studentAttendance = array_diff($studentAttendance, array_keys($holidays));
+        // Get attendance counts per day (allowing multiple entries)
+        $studentAttendance = $this->getAttendanceCounts($attendanceQuery, $holidays);
 
-        // Calculate number of absences (scheduled days - attended days)
+        // Get all attendance records per day (listing entries)
+        $studentAttendanceTable = $this->getAttendanceRecords($attendanceQuery, $holidays);
+
+        // Calculate total attendance and absences
         $numOfStudentAttendance = count($studentAttendance);
-
         $numOfAbsences = $numOfSchoolDays - $numOfStudentAttendance;
 
         // Check if the student is present today
-        $isPresentToday = in_array(Carbon::today()->toDateString(), $studentAttendance);
+        $isPresentToday = isset($studentAttendance[Carbon::today()->toDateString()]);
 
-        // Fetch attendance data for charts
-        $dailyAttendanceQuery = DB::table("student_attendances")
-        ->selectRaw("DATE(created_at) as date, COUNT(*) as count")
-        ->where("student_attendances.student_id", $student->id)
-        ->whereBetween("created_at", [$startDate, $endDate])
-        ->groupBy("date")
-        ->orderBy("date");
+        // Prepare attendance data for charts
+        $dailyLabels = array_keys($studentAttendance);
+        $dailyValues = array_values($studentAttendance);
 
-        $dailyAttendance = $dailyAttendanceQuery->get();
-
-        // Filter out holidays from the daily attendance data
-        $dailyAttendance = $dailyAttendance->filter(function ($attendance) use ($holidays) {
-        return !isset($holidays[$attendance->date]);
-        });
-
-        // Prepare Daily Attendance Data for Chart.js
-        $dailyLabels = $dailyAttendance->pluck("date")->toArray();
-        $dailyValues = $dailyAttendance->pluck("count")->toArray();
-
-        $dailyAttendanceEvents = array_map(function ($date, $value) {
-            return [
-                'title' => "Present",
-                'start' => $date,
-                'backgroundColor' => '#008000', // Red color for absence,
-            ];
-        }, $dailyLabels, $dailyValues);
-
-        // Create Absence Events (where the student was scheduled but not present)
-        $absenceEvents = [];
-        foreach (array_diff($scheduledDates, $studentAttendance) as $absenceDate) {
-            $absenceEvents[] = [
-                'title' => 'Absent',
-                'start' => $absenceDate,
-                'backgroundColor' => '#800000', // Red color for absence,
-            ];
-        }
-
-        // Create Holiday Events
-        $holidayEvents = [];
-        foreach ($holidays as $holidayDate => $holidayName) {
-            // If the holiday falls within the selected date range
-            if ($holidayDate >= $startDate && $holidayDate <= $endDate) {
-                $holidayEvents[] = [
-                    'title' => $holidayName,
-                    'start' => $holidayDate,
-                    'backgroundColor' => '#808000', // Red color for holiday
-                ];
-            }
-        }
-
-        // Fetch monthly attendance data
-        $monthlyAttendanceQuery = DB::table("student_attendances")
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count")
-            ->where("student_attendances.student_id", $student->id)
-            ->whereBetween("created_at", [$startDate, $endDate])
-            ->groupBy("month")
-            ->orderBy("month");
-
-        $monthlyAttendance = $monthlyAttendanceQuery->get();
-
-        // Prepare Monthly Attendance Data for Chart.js
-        $monthlyLabels = $monthlyAttendance->pluck("month")->map(function ($month) {
-            return date("M", strtotime($month));
-        })->toArray();
-
-        $monthlyValues = $monthlyAttendance->pluck("count")->toArray();
-
+        $dailyAttendanceEvents = $this->prepareAttendanceEvents($studentAttendance, '#008000');
+        $absenceEvents = $this->prepareAbsenceEvents($scheduledDates, array_keys($studentAttendance), '#800000');
+        $holidayEvents = $this->prepareHolidayEvents($holidays, $startDate, $endDate);
 
         return view(
             "admin.student_reports",
@@ -299,11 +215,123 @@ class ReportController extends Controller
                 "numOfAbsences",
                 "absenceEvents",
                 "dailyAttendanceEvents",
-                "monthlyLabels",
-                "monthlyValues",
-                "holidayEvents"
+                "holidayEvents",
+                "studentAttendanceTable"
             )
         );
     }
+
+    // Extracted function to get the scheduled dates
+    private function getScheduledDates($startDate, $endDate, $scheduleDays, $dayMap, $holidays)
+    {
+        $scheduledDates = [];
+        $currentDate = Carbon::parse($startDate);
+
+        while ($currentDate->lte($endDate)) {
+            $dayNumber = $currentDate->dayOfWeek;
+            $dayNumber = ($dayNumber == 0) ? 7 : $dayNumber;
+
+            if (in_array(array_search($dayNumber, $dayMap), $scheduleDays)) {
+                if (!isset($holidays[$currentDate->toDateString()])) {
+                    $scheduledDates[] = $currentDate->toDateString();
+                }
+            }
+
+            $currentDate->addDay();
+        }
+
+        return $scheduledDates;
+    }
+
+    // Extracted function to get the attendance counts
+    private function getAttendanceCounts($attendanceQuery, $holidays)
+    {
+        // Clone and get attendance counts per day
+        $attendanceData = $attendanceQuery->clone()
+            ->selectRaw("DATE(created_at) as date, COUNT(*) as count")
+            ->groupBy("date")
+            ->pluck("count", "date")
+            ->toArray();
+
+        // Exclude holidays from attendance counts per day
+        foreach ($holidays as $holidayDate => $event) {
+            if (isset($attendanceData[$holidayDate])) {
+                unset($attendanceData[$holidayDate]);
+            }
+        }
+        
+        return $attendanceData;
+    }
+
+    // Extracted function to get the attendance records
+    private function getAttendanceRecords($attendanceQuery, $holidays)
+    {
+        // Clone and get all attendance records per day
+        $attendanceData = $attendanceQuery->clone()
+            ->select("id", "created_at", "status")
+            ->orderBy("created_at", "asc")
+            ->get()
+            ->groupBy(function ($entry) {
+                return \Carbon\Carbon::parse($entry->created_at)->format('Y-m-d');
+            });
+
+        // Exclude holidays from attendance records per day
+        foreach ($holidays as $holidayDate => $event) {
+            if (isset($attendanceData[$holidayDate])) {
+                unset($attendanceData[$holidayDate]);
+            }
+        }
+
+        return $attendanceData->reverse();
+    }
+
+    // Extracted function to prepare attendance events for charts
+    private function prepareAttendanceEvents($attendanceData, $color)
+    {
+        $events = [];
+        foreach ($attendanceData as $date => $count) {
+            $events[] = [
+                'title' => "Present ($count)",
+                'start' => $date,
+                'backgroundColor' => $color,
+            ];
+        }
+
+        return $events;
+    }
+
+    // Extracted function to prepare absence events for charts
+    private function prepareAbsenceEvents($scheduledDates, $attendanceDates, $color)
+    {
+        $events = [];
+        foreach (array_diff($scheduledDates, $attendanceDates) as $absenceDate) {
+            $events[] = [
+                'title' => 'Absent',
+                'start' => $absenceDate,
+                'backgroundColor' => $color,
+            ];
+        }
+
+        return $events;
+    }
+
+    // Extracted function to prepare holiday events for charts
+    private function prepareHolidayEvents($holidays, $startDate, $endDate)
+    {
+        $events = [];
+        foreach ($holidays as $holidayDate => $holidayName) {
+            if ($holidayDate >= $startDate && $holidayDate <= $endDate) {
+                $events[] = [
+                    'title' => $holidayName,
+                    'start' => $holidayDate,
+                    'backgroundColor' => '#808000',
+                ];
+            }
+        }
+
+        return $events;
+    }
+
+
 
 }

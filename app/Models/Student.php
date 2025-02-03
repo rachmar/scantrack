@@ -44,7 +44,7 @@ class Student extends Model
             'M' => 'Monday',
             'T' => 'Tuesday',
             'W' => 'Wednesday',
-            'Th' => 'Thursday',
+            'TH' => 'Thursday',
             'F' => 'Friday',
             'S' => 'Saturday',
         ];
