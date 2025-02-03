@@ -17,6 +17,13 @@ Route::post('/process', '\App\Http\Controllers\ScanController@show')->name('proc
 Route::group(['middleware' => ['auth', 'auth.roles'], 'roles' => ['admin']], function () {
     Route::get('/admin', '\App\Http\Controllers\DashboardController@index')->name('admin');
     Route::get('/school-reports', '\App\Http\Controllers\ReportController@schoolReports')->name('school.reports');
-    Route::get('/student-reports', '\App\Http\Controllers\ReportController@studentReports')->name('student.reports');
+
+    Route::get('/reports/courses', '\App\Http\Controllers\ReportController@courseReportIndex')->name('reports.courses.index');
+
+    Route::get('/reports/students', '\App\Http\Controllers\ReportController@studentReportIndex')->name('reports.students.index');
+    Route::get('/reports/students/{id}', '\App\Http\Controllers\ReportController@studentReportShow')->name('reports.students.show');
+
     Route::resource('students', '\App\Http\Controllers\StudentController');
 });
+
+

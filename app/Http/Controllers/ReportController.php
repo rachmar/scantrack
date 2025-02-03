@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Department;
 use App\Models\Holiday;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -11,11 +12,11 @@ use Carbon\Carbon;
 
 class ReportController extends Controller
 {
-    public function schoolReports(Request $request)
+    public function courseReportIndex(Request $request)
     {
-        // Get today's date for both start and end date
-        $startDate = $request->get("start_date",Carbon::today()->toDateString());
-        $endDate = $request->get("end_date", Carbon::today()->toDateString());
+        // Get today's date for both start and end date, default to whole month if not provided
+        $startDate = $request->get("start_date", Carbon::today()->startOfMonth()->toDateString());
+        $endDate = $request->get("end_date", Carbon::today()->endOfMonth()->toDateString());
 
         // Fetch Students per Course (Total Students per Course)
         $studentsPerCourse = Course::withCount("students")->get();
@@ -145,15 +146,38 @@ class ReportController extends Controller
     }
 
 
+    public function studentReportIndex(Request $request)
+    {
+        $query = Student::query();
 
-    public function studentReports(Request $request)
+        if ($request->filled('name') || $request->filled('course_id')) { // Only execute query if either name or course_id is filled
+            if ($request->filled('name')) {
+                $query->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $request->name . '%']);
+            }
+
+            if ($request->filled('course_id')) {
+                $query->where('course_id', $request->course_id);
+            }
+
+            $students = $query->get(); // Fetch all results without pagination
+        } else {
+            $students = collect();
+        }
+
+        $departments = Department::with('courses')->get();
+
+        return view('admin.reports.students.index', compact('students', 'departments'));
+
+    }
+    
+
+    public function studentReportShow(Request $request, $id)
     {
         // Get today's date for both start and end date, default to whole month if not provided
         $startDate = $request->get("start_date", Carbon::today()->startOfMonth()->toDateString());
         $endDate = $request->get("end_date", Carbon::today()->endOfMonth()->toDateString());
 
-        // Fetch student record
-        $student = Student::where('card_id', $request->student_id)->first() ?? Student::first();
+        $student = Student::where('id', $id)->first();
 
         // Convert student's schedule into an array
         $scheduleDays = $student->schedule ?? [];
@@ -181,7 +205,7 @@ class ReportController extends Controller
 
         // Define the common query logic for attendance
         $attendanceQuery = DB::table("student_attendances")
-            ->where("student_attendances.student_id", $student->id)
+            ->where("student_attendances.student_id", $student->id ?? 0)
             ->whereBetween("student_attendances.created_at", [$startDate, $endDate]);
 
         // Get attendance counts per day (allowing multiple entries)
@@ -194,8 +218,12 @@ class ReportController extends Controller
         $numOfStudentAttendance = count($studentAttendance);
         $numOfAbsences = $numOfSchoolDays - $numOfStudentAttendance;
 
-        $absenteeismRate = round((($numOfAbsences / $numOfSchoolDays) * 100), 2);
-
+        if ($numOfSchoolDays > 0) {
+            $absenteeismRate = round((($numOfAbsences / $numOfSchoolDays) * 100), 2);
+        } else {
+            $absenteeismRate = 0; // or handle the case as needed
+        }
+        
         // Check if the student is present today
         $isPresentToday = isset($studentAttendance[Carbon::today()->toDateString()]);
 
@@ -208,7 +236,7 @@ class ReportController extends Controller
         $holidayEvents = $this->prepareHolidayEvents($holidays, $startDate, $endDate);
 
         return view(
-            "admin.student_reports",
+            "admin.reports.students.show",
             compact(
                 "student",
                 "isPresentToday",

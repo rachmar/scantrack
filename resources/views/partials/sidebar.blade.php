@@ -19,8 +19,13 @@
                </a>
             </li>
             <li class="">
-               <a href="/student-reports" class="waves-effect {{ request()->is("student-reports") || request()->is("student-reports/*") ? "mm active" : "" }}">
-                  <i class="fas fa-file-alt"></i><span>Student Report</span>
+               <a href="{{route('reports.courses.index')}}" class="waves-effect {{ request()->is("reports/students") || request()->is("reports/students/*") ? "mm active" : "" }}">
+                  <i class="fas fa-file-alt"></i><span>Reports - Courses</span>
+               </a>
+            </li>
+            <li class="">
+               <a href="{{route('reports.students.index')}}" class="waves-effect {{ request()->is("reports/students") || request()->is("reports/students/*") ? "mm active" : "" }}">
+                  <i class="fas fa-file-alt"></i><span>Reports - Students</span>
                </a>
             </li>
          </ul>

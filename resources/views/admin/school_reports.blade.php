@@ -7,10 +7,6 @@
 <div class="col-sm-6 text-left" >
      <h4 class="page-title mb-2">Overall School Report</h4>
      <form method="GET" action="{{ route('school.reports') }}" class="mb-4">
-        @php
-            $startDate = request()->get('start_date', \Carbon\Carbon::now()->toDateString());
-            $endDate = request()->get('end_date', \Carbon\Carbon::now()->toDateString());
-        @endphp
         <div class="row">
             <div class="col-md-4">
                 <label for="start_date" class="form-label">Start Date:</label>

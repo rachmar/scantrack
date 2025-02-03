@@ -18,4 +18,10 @@ class Department extends Model
         'slug',
         'name',
     ];
+
+    public function courses()
+    {
+        return $this->hasMany(Course::class);
+    }
+
 }

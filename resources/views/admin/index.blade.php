@@ -8,7 +8,9 @@
      <h4 class="page-title">Dashboard</h4>
      <ol class="breadcrumb">
          <li class="breadcrumb-item active">Welcome to Attendance Management System</li>
+         <li class="breadcrumb-item active">Welcome to Attendance Management System</li>
      </ol>
+     <button>sad</button>
 </div>
 @endsection
 
