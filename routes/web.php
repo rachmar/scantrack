@@ -19,6 +19,7 @@ Route::group(['middleware' => ['auth', 'auth.roles'], 'roles' => ['admin']], fun
     Route::get('/school-reports', '\App\Http\Controllers\ReportController@schoolReports')->name('school.reports');
 
     Route::get('/reports/courses', '\App\Http\Controllers\ReportController@courseReportIndex')->name('reports.courses.index');
+    Route::post('/reports/courses/lists', '\App\Http\Controllers\ReportController@getCourses')->name('reports.courses.lists');
 
     Route::get('/reports/students', '\App\Http\Controllers\ReportController@studentReportIndex')->name('reports.students.index');
     Route::get('/reports/students/{id}', '\App\Http\Controllers\ReportController@studentReportShow')->name('reports.students.show');

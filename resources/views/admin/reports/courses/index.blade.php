@@ -4,19 +4,43 @@
 @endsection
 
 @section('breadcrumb')
-<div class="col-sm-6 text-left" >
-     <h4 class="page-title mb-2">Overall School Report</h4>
-     <form method="GET" action="{{ route('school.reports') }}" class="mb-4">
-        <div class="row">
-            <div class="col-md-4">
+<div class="col-sm-12 text-left">
+    <h4 class="page-title mb-3">Overall School Report</h4>
+    <form method="GET" action="{{ route('reports.courses.index') }}" class="mb-4">
+        <div class="row g-2 align-items-end d-flex flex-wrap">
+            <div class="col-md-3">
+                <label for="department" class="form-label">Select Department:</label>
+                <select id="department" class="form-control" name="department">
+                    <option value="">-- Select Department --</option>
+                    @foreach($departments as $department)
+                        <option value="{{ $department->id }}" {{ request('department') == $department->id ? 'selected' : '' }}>
+                            {{ $department->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="course" class="form-label">Select Course:</label>
+                <select id="course" class="form-control" name="course">
+                    <option value="">-- Select Course --</option>
+                    
+                </select>
+            </div>
+
+            <div class="col-md-2">
                 <label for="start_date" class="form-label">Start Date:</label>
-                <input type="date" id="start_date" name="start_date" class="form-control" value="{{ $startDate }}">
+                <input type="date" id="start_date" name="start_date" class="form-control" 
+                    value="{{ request('start_date', $startDate) }}">
             </div>
-            <div class="col-md-4">
+
+            <div class="col-md-2">
                 <label for="end_date" class="form-label">End Date:</label>
-                <input type="date" id="end_date" name="end_date" class="form-control" value="{{ $endDate }}">
+                <input type="date" id="end_date" name="end_date" class="form-control" 
+                    value="{{ request('end_date', $endDate) }}">
             </div>
-            <div class="col-md-4 d-flex align-items-end">
+
+            <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100">Filter</button>
             </div>
         </div>
@@ -288,6 +312,68 @@
         }
     });
 </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const departmentDropdown = document.getElementById("department");
+        const courseDropdown = document.getElementById("course");
+        const selectedCourse = '{{ request('course') }}'; // Get the selected course from the GET request
+        
+        // Retain selected course value on page load if available
+        if (selectedCourse) {
+            courseDropdown.value = selectedCourse;
+        }
+
+        departmentDropdown.addEventListener("change", function () {
+            let departmentId = this.value;
+            courseDropdown.innerHTML = '<option value="">Loading...</option>';
+            
+            if (departmentId) {
+                fetch("{{ route('reports.courses.lists') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ department_id: departmentId })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    courseDropdown.innerHTML = '<option value="">-- Select Course --</option>';
+                    data.forEach(course => {
+                        let option = document.createElement("option");
+                        option.value = course.id;
+                        option.textContent = course.name;
+
+                        // Pre-select the course if it's the same as the one in the GET request
+                        if (course.id == selectedCourse) {
+                            option.selected = true;
+                        }
+
+                        courseDropdown.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching courses:", error);
+                    courseDropdown.innerHTML = '<option value="">Error loading courses</option>';
+                });
+            } else {
+                courseDropdown.innerHTML = '<option value="">-- Select Course --</option>';
+            }
+        });
+
+        // Trigger the change event on page load if a department is selected
+        if (departmentDropdown.value) {
+            departmentDropdown.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+
 @endsection
 
 

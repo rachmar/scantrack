@@ -13,7 +13,9 @@ use Carbon\Carbon;
 class ReportController extends Controller
 {
     public function courseReportIndex(Request $request)
-    {
+    {   
+        $departments = Department::get();
+
         // Get today's date for both start and end date, default to whole month if not provided
         $startDate = $request->get("start_date", Carbon::today()->startOfMonth()->toDateString());
         $endDate = $request->get("end_date", Carbon::today()->endOfMonth()->toDateString());
@@ -43,10 +45,16 @@ class ReportController extends Controller
                 DB::raw("COUNT(DISTINCT DATE(student_attendances.created_at)) as distinct_attendance_days")
             )
             ->whereBetween("student_attendances.created_at", [$startDate, $endDate])
-            // ->where("departments.id", 1) // Exclude holidays
             ->where("holidays.date")
+            ->when($request->department, function ($query, $department) {
+                return $query->where("departments.id", $department);
+            })
+            ->when($request->course, function ($query, $course) {
+                return $query->where("courses.id", $course);
+            })
             ->groupBy("students.card_id", "courses.slug", "departments.slug", "courses.name", "departments.name")
             ->get();
+    
 
         // Sum distinct attendance days per department
         $attendanceSummedByDepartment = $distinctAttendanceDaysByDepartmentStudent->groupBy('department_slug')->map(function ($group) {
@@ -124,119 +132,17 @@ class ReportController extends Controller
         ];
 
         return view('admin.reports.courses.index', compact(
-            'startDate', 'endDate',
-            'attendanceSummedByDepartment', 'attendanceSummedByCourse',
-            'absenteeismReport', 'schoolDaysUtilization', 'chartData',
-            'absenteeismRateCourse'
+            'startDate', 
+            'endDate',
+            'attendanceSummedByDepartment',
+            'attendanceSummedByCourse',
+            'absenteeismReport', 
+            'schoolDaysUtilization',
+            'chartData',
+            'absenteeismRateCourse', 
+            'departments'
         ));
     }
-
-
-
-
-
-        // // Number of Students Present Today in Total
-        // $studentsPresentToday = $studentsPresentTodayByCourse->sum(
-        //     "attendance_count"
-        // );
-
-
-        // // Fetch attendance by course, optionally filtered by date range
-        // $attendanceByCourseQuery = DB::table("student_attendances")
-        //     ->join(
-        //         "students",
-        //         "student_attendances.student_id",
-        //         "=",
-        //         "students.id"
-        //     )
-        //     ->join("courses", "students.course_id", "=", "courses.id")
-        //     ->select(
-        //         "courses.slug as course_name",
-        //         DB::raw("COUNT(student_attendances.id) as attendance_count")
-        //     )
-        //     ->groupBy("course_name");
-
-        // // Apply date range filter if provided
-        // $attendanceByCourseQuery->whereBetween(
-        //     "student_attendances.created_at",
-        //     [$startDate, $endDate]
-        // );
-
-        // $attendanceByCourse = $attendanceByCourseQuery->get();
-
-        // // Prepare Attendance by Course Data for Chart.js
-        // $attendanceByCourseValues = $attendanceByCourse
-        //     ->pluck("attendance_count")
-        //     ->toArray();
-
-        //       // Prepare Course Enrollment Data for Chart.js
-        // $attendanceByCourseLabels = $attendanceByCourse
-        //     ->pluck("course_name")
-        //     ->toArray(); // Course names
-
-        // // Fetch daily attendance data, optionally filtered by date range
-        // $attendanceQuery = DB::table("student_attendances")
-        //     ->selectRaw("DATE(created_at) as date, COUNT(*) as count")
-        //     ->groupBy("date");
-
-        // // Apply date range filter if provided
-        // $attendanceQuery->whereBetween("created_at", [$startDate, $endDate]);
-
-        // $attendance = $attendanceQuery->get();
-
-        // // Prepare Daily Attendance Data for Chart.js
-        // $attendanceLabels = $attendance->pluck("date")->toArray();
-        // $attendanceValues = $attendance->pluck("count")->toArray();
-
-
-        // // Fetch Students Absent Today by Course (Total Absentees per Course)
-        // // Fetch Courses with High Absentee Rates (Above 80%)
-        // $coursesWithHighAbsenteeRates = DB::table("students")
-        // ->join("courses", "students.course_id", "=", "courses.id")
-        // ->leftJoin(
-        //     "student_attendances",
-        //     function ($join) use ($startDate, $endDate) {
-        //         $join->on("students.id", "=", "student_attendances.student_id")
-        //             ->whereBetween("student_attendances.created_at", [$startDate, $endDate]);
-        //     }
-        // )
-        // ->select(
-        //     "courses.slug as course_name",
-        //     DB::raw("COUNT(DISTINCT  students.id) as total_students"),
-        //     DB::raw("COUNT(DISTINCT  student_attendances.student_id) as attendance_count"),
-        //     DB::raw("COUNT(DISTINCT  students.id) - COUNT(DISTINCT student_attendances.student_id) as absent_count"),
-        //     DB::raw("ROUND((COUNT(DISTINCT students.id) - COUNT(DISTINCT student_attendances.student_id)) / COUNT(DISTINCT students.id) * 100, 2) as absentee_rate")
-        //     )
-        // ->groupBy("course_name")
-        // ->get();
-
-        // $coursesWithHighAbsenteeRateLabels = $coursesWithHighAbsenteeRates->pluck('course_name');
-        // $coursesWithHighAbsenteeRateTotalStudents = $coursesWithHighAbsenteeRates->pluck('total_students');
-        // $coursesWithHighAbsenteeRateAttendanceCounts = $coursesWithHighAbsenteeRates->pluck('attendance_count');
-        // $coursesWithHighAbsenteeRateAbsentCounts = $coursesWithHighAbsenteeRates->pluck('absent_count');
-        // $coursesWithHighAbsenteeRateValues  = $coursesWithHighAbsenteeRates->pluck('absentee_rate');
-
-        // return view(
-        //     "admin.school_reports",
-        //     compact(
-        //         "studentsPerCourse",
-        //         "attendanceByCourseLabels",
-        //         "attendanceByCourseValues",
-        //         "attendanceLabels",
-        //         "attendanceValues",
-        //         "studentsPresentToday",
-        //         "startDate",
-        //         "endDate",
-        //         "studentsPresentTodayByCourse",
-        //         'coursesWithHighAbsenteeRateLabels',
-        //         'coursesWithHighAbsenteeRateTotalStudents',
-        //         'coursesWithHighAbsenteeRateAttendanceCounts',
-        //         'coursesWithHighAbsenteeRateAbsentCounts',
-        //         'coursesWithHighAbsenteeRateValues'
-        //     )
-        // );
-    // }
-
 
     public function studentReportIndex(Request $request)
     {
@@ -347,8 +253,14 @@ class ReportController extends Controller
         );
     }
 
+    public function getCourses(Request $request)
+    {
+        $courses = Course::where('department_id', $request->department_id)->get();
+        return response()->json($courses);
+    }
+
     // Extracted function to get the scheduled dates
-    private function    getScheduledDates($startDate, $endDate, $scheduleDays, $dayMap, $holidays)
+    private function getScheduledDates($startDate, $endDate, $scheduleDays, $dayMap, $holidays)
     {
         $scheduledDates = [];
         $currentDate = Carbon::parse($startDate);
