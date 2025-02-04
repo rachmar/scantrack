@@ -5,21 +5,20 @@ use Illuminate\Support\Facades\Route;
 include "auth.php";
 
 Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+    return redirect()->route('public.scan.index');
+});
 
-Route::get('/fullscreen', function () {
-    return view('fullscreen');
-})->name('fullscreen');
+Route::get('/scan', '\App\Http\Controllers\ScanController@index')->name('public.scan.index');
+Route::post('/scan', '\App\Http\Controllers\ScanController@show')->name('public.scan.show');
 
-Route::post('/process', '\App\Http\Controllers\ScanController@show')->name('process.show');
+Route::get('/visitor', '\App\Http\Controllers\VisitorController@index')->name('public.visitor.index');
+Route::post('/visitor', '\App\Http\Controllers\VisitorController@store')->name('public.visitor.store');
 
 Route::group(['middleware' => ['auth', 'auth.roles'], 'roles' => ['admin']], function () {
     Route::get('/admin', '\App\Http\Controllers\DashboardController@index')->name('admin');
-    Route::get('/school-reports', '\App\Http\Controllers\ReportController@schoolReports')->name('school.reports');
 
     Route::get('/reports/courses', '\App\Http\Controllers\ReportController@courseReportIndex')->name('reports.courses.index');
-    Route::post('/reports/courses/lists', '\App\Http\Controllers\ReportController@getCourses')->name('reports.courses.lists');
+    Route::post('/reports/courses/lists', '\App\Http\Controllers\ReportController@getCourses')->name('reports.get.courses');
 
     Route::get('/reports/students', '\App\Http\Controllers\ReportController@studentReportIndex')->name('reports.students.index');
     Route::get('/reports/students/{id}', '\App\Http\Controllers\ReportController@studentReportShow')->name('reports.students.show');

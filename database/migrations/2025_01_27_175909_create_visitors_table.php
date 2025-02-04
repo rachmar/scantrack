@@ -16,12 +16,15 @@ class CreateVisitorsTable extends Migration
         Schema::create('visitors', function (Blueprint $table) {
             $table->id();
             $table->string('card_id')->unique(); 
-            $table->string('first_name');
-            $table->string('last_name');
-            $table->string('email');
+            $table->unsignedBigInteger('directory_id');
+            $table->string('name');
             $table->string('phone');
-            $table->text('image')->default('visitor.png');
+            $table->text('purpose');
             $table->timestamps();
+            $table->foreign('directory_id')
+                  ->references('id')
+                  ->on('directories')
+                  ->onDelete('cascade');
         });
     }
 

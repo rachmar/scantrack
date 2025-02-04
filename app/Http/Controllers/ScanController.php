@@ -7,7 +7,18 @@ use App\Models\Visitor;
 use Illuminate\Http\Request;
 
 class ScanController extends Controller
-{
+{   
+    /**
+     * Display the specified student or visitor.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        return view("public.scan");
+    }
+
     /**
      * Display the specified student or visitor.
      *

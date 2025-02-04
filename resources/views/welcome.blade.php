@@ -106,7 +106,7 @@
             hasScanned = true; // Set this flag when the scan starts
 
             $.ajax({
-                url: `{{ route('process.show') }}`, // Replace with your endpoint
+                url: `{{ route('public.scan.show') }}`, // Replace with your endpoint
                 type: 'POST',
                 data: {
                     code: decodedText,

@@ -329,7 +329,7 @@
             courseDropdown.innerHTML = '<option value="">Loading...</option>';
             
             if (departmentId) {
-                fetch("{{ route('reports.courses.lists') }}", {
+                fetch("{{ route('reports.get.courses') }}", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

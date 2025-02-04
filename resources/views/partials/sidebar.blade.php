@@ -14,18 +14,13 @@
                </a>
             </li>
             <li class="">
-               <a href="/school-reports" class="waves-effect {{ request()->is("school-reports") || request()->is("school-reports/*") ? "mm active" : "" }}">
-                  <i class="fas fa-chart-bar"></i><span>School Report</span>
+               <a href="{{route('reports.students.index')}}" class="waves-effect {{ request()->is("reports/students") || request()->is("reports/students/*") ? "mm active" : "" }}">
+                  <i class="fas fa-file-alt"></i><span>Reports - Students</span>
                </a>
             </li>
             <li class="">
                <a href="{{route('reports.courses.index')}}" class="waves-effect {{ request()->is("reports/students") || request()->is("reports/students/*") ? "mm active" : "" }}">
-                  <i class="fas fa-file-alt"></i><span>Reports - Courses</span>
-               </a>
-            </li>
-            <li class="">
-               <a href="{{route('reports.students.index')}}" class="waves-effect {{ request()->is("reports/students") || request()->is("reports/students/*") ? "mm active" : "" }}">
-                  <i class="fas fa-file-alt"></i><span>Reports - Students</span>
+                  <i class="fas fa-file-alt"></i><span>Reports - Department</span>
                </a>
             </li>
          </ul>

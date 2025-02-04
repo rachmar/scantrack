@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Course;
 use App\Models\Department;
+use App\Models\Directory;
 use App\Models\Holiday;
 use Illuminate\Database\Seeder;
 use App\Models\User;
@@ -46,13 +47,13 @@ class DatabaseSeeder extends Seeder
                 "Bachelor of Science in Elementary Education (BEED)",
                 "Bachelor of Science in Hospitality Management (BSHM)",
             ],
-            "AH" => [
+            "ALLIED HEALTH" => [
                 "Bachelor of Science in Pharmacy (BSPh)",
                 "Bachelor of Science in Medical Technology (BSMT)",
             ],
-            "BED" => [
-                "Junior High (JH)",
-                "Senior High (SH)",
+            "BASIC EDUCATION" => [
+                "Junior High (JuniorHigh)",
+                "Senior High (SeniorHigh)",
             ],
             "NURSING" => [
                 "Bachelor of Science in Nursing (BSN)",
@@ -67,7 +68,7 @@ class DatabaseSeeder extends Seeder
             // Create department
             $department = Department::create([
                 'name' => $departmentName,
-                'slug' => strtoupper(Str::slug($departmentName)),
+                'slug' => $departmentName,
             ]);
         
             foreach ($departmentCourses as $course) {
@@ -82,6 +83,40 @@ class DatabaseSeeder extends Seeder
                     'department_id' => $department->id, // Associate course with the department
                 ]);
             }
+        }
+
+
+        $directories = [
+            "ADMISSION",
+            "REGISTRAR",
+            "CASHIER",
+            "ACCOUNTING",
+            "NURSING",
+            "MEDICINE",
+            "ASBME",
+            "BASIC EDUCATION",
+            "ALLIED HEALTH"
+        ];
+
+        foreach ($directories as $directory) {
+            Directory::create([
+                'name' => $directory,
+                'slug' => $directory,
+            ]);
+        }
+
+        $directoryIDs = Directory::pluck("id")->toArray();
+
+        $faker = Faker::create();
+
+        for ($i = 1; $i <= 500; $i++) {
+            Visitor::create([
+                'card_id' => strtoupper('VIS'. bin2hex(random_bytes(5))),
+                'name' => $faker->firstName.' '.$faker->lastName,
+                "phone" => $faker->phoneNumber,
+                "directory_id" => $faker->randomElement($directoryIDs), // Assign random course ID
+                'purpose' => $faker->sentence,
+            ]);
         }
         
 
