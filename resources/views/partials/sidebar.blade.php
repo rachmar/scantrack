@@ -14,6 +14,11 @@
                </a>
             </li>
             <li class="">
+               <a href="{{route('reports.visitor.index')}}" class="waves-effect {{ request()->is("reports/visitors") || request()->is("reports/visitors/*") ? "mm active" : "" }}">
+                  <i class="fas fa-file-alt"></i><span>Reports - Visitors</span>
+               </a>
+            </li>
+            <li class="">
                <a href="{{route('reports.students.index')}}" class="waves-effect {{ request()->is("reports/students") || request()->is("reports/students/*") ? "mm active" : "" }}">
                   <i class="fas fa-file-alt"></i><span>Reports - Students</span>
                </a>

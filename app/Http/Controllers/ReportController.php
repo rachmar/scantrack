@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Department;
 use App\Models\Holiday;
 use App\Models\Student;
+use App\Models\Visitor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -169,6 +170,17 @@ class ReportController extends Controller
 
     }
     
+    public function visitorReportIndex(Request $request)
+    {   
+        $visitors = Visitor::all();
+
+        return view(
+            "admin.reports.visitors.index",
+            compact(
+                "visitors",
+            )
+        );
+    }
 
     public function studentReportShow(Request $request, $id)
     {
