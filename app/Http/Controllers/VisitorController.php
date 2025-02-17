@@ -23,7 +23,7 @@ class VisitorController extends Controller
         $visitor = Visitor::where('card_id', $request->visitor)->first();
 
         if ($visitor) {
-            $qrcode = QrCode::size(300)
+            $qrCode = QrCode::size(300)
             ->margin(2) // Adds a white border
             ->generate($visitor->card_id);
         }

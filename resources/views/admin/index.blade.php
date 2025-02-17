@@ -28,7 +28,7 @@
                             <i class="fas fa-chalkboard-teacher fa-2x"></i>
                         </div>
                         <h5 class="font-16 text-uppercase mt-0 text-white">{{ $departmentKey }}</h5>
-                        <h4 class="font-500">{{ $departmentValue }} presents</h4>
+                        <h4 class="font-500">{{ $departmentValue }} present</h4>
                     </div>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                             <i class="fas fa-chalkboard-teacher fa-2x"></i>
                         </div>
                         <h5 class="font-16 text-uppercase mt-0 text-white">{{ $courseKey }}</h5>
-                        <h4 class="font-500">{{ $courseValue }} presents</h4>
+                        <h4 class="font-500">{{ $courseValue }} present</h4>
                     </div>
                 </div>
             </div>
