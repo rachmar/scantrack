@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Department;
+use App\Models\Directory;
 use App\Models\Holiday;
 use App\Models\Student;
 use App\Models\Visitor;
@@ -172,12 +173,31 @@ class ReportController extends Controller
     
     public function visitorReportIndex(Request $request)
     {   
-        $visitors = Visitor::all();
+        // Get today's date for both start and end date, default to whole month if not provided
+        $startDate = $request->get("start_date", Carbon::today()->startOfMonth()->toDateString());
+        $endDate = $request->get("end_date", Carbon::today()->endOfMonth()->toDateString());
+
+        $visitorPerDirectories = Directory::withCount([
+            'visitors' => function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            }
+        ])->get()->mapWithKeys(function ($directory) {
+            return [$directory->name => $directory->visitors_count];
+        });
+
+        // Prepare chart data
+        $chartData = [
+            'visitorPerDirectoryLabels' => $visitorPerDirectories->keys()->toArray(),
+            'visitorPerDirectoryValues' => $visitorPerDirectories->values()->toArray(),
+        ];
 
         return view(
             "admin.reports.visitors.index",
             compact(
-                "visitors",
+                "startDate",
+                "endDate",
+                "visitorPerDirectories",
+                "chartData"
             )
         );
     }

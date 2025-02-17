@@ -8,4 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class Directory extends Model
 {
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'slug',
+        'name',
+    ];
+
+    public function visitors()
+    {
+        return $this->hasMany(Visitor::class);
+    }
 }
