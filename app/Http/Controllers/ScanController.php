@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendStudentNotificationJob;
 use App\Models\Student;
 use App\Models\Visitor;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 
 class ScanController extends Controller
@@ -36,6 +38,7 @@ class ScanController extends Controller
         $student = Student::where('card_id', $request->code)->first();
 
         if ($student) {
+            SendStudentNotificationJob::dispatch($student);
             return response()->json($student);
         }
 
@@ -49,6 +52,11 @@ class ScanController extends Controller
         return response()->json([
             'message' => 'Scan ID not found, Please check the ID and try again.'
         ], 404);
+    }
+
+    private function sendMessageSemaphore(Student $student){
+
+        
     }
 
 }
