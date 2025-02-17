@@ -52,11 +52,15 @@ class StudentController extends Controller
     public function show(Student $student)
     {   
         $filename = $student->fullName().'.svg';
-        $qrcode = QrCode::size(300)->generate($student->card_id);
+        $qrcode = QrCode::size(300)
+            ->margin(2) // Adds a white border
+            ->generate($student->card_id);
+        
         return Response::make($qrcode, 200, [
-            'Content-Type' => 'image/svg',
+            'Content-Type' => 'image/svg+xml',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);
+        
     }
 
     /**

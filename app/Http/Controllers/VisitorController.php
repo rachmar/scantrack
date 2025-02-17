@@ -23,7 +23,9 @@ class VisitorController extends Controller
         $visitor = Visitor::where('card_id', $request->visitor)->first();
 
         if ($visitor) {
-            $qrCode = QrCode::size(300)->generate($visitor->card_id);
+            $qrcode = QrCode::size(300)
+            ->margin(2) // Adds a white border
+            ->generate($visitor->card_id);
         }
 
         return view("public.visitor", compact('directories', 'qrCode', 'visitor'));
