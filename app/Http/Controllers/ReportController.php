@@ -213,23 +213,13 @@ class ReportController extends Controller
         // Convert student's schedule into an array
         $scheduleDays = $student->schedule ?? [];
 
-        // Map days of the week to their respective codes
-        $dayMap = [
-            'M'  => 1,  // Monday
-            'T'  => 2,  // Tuesday
-            'W'  => 3,  // Wednesday
-            'TH' => 4,  // Thursday
-            'F'  => 5,  // Friday
-            'S'  => 6,  // Saturday
-        ];
-
         // Fetch holidays within the date range
         $holidays = Holiday::whereBetween('date', [$startDate, $endDate])
             ->pluck('name', 'date')
             ->toArray();
 
         // Get all valid scheduled dates for the student within the date range
-        $scheduledDates = $this->getScheduledDates($startDate, $endDate, $scheduleDays, $dayMap, $holidays);
+        $scheduledDates = $this->getScheduledDates($startDate, $endDate, $scheduleDays, $holidays);
 
         // Calculate number of school days based on the schedule
         $numOfSchoolDays = count($scheduledDates);
@@ -292,8 +282,18 @@ class ReportController extends Controller
     }
 
     // Extracted function to get the scheduled dates
-    private function getScheduledDates($startDate, $endDate, $scheduleDays, $dayMap, $holidays)
+    private function getScheduledDates($startDate, $endDate, $scheduleDays, $holidays)
     {
+         // Map days of the week to their respective codes
+         $dayMap = [
+            'M'  => 1,  // Monday
+            'T'  => 2,  // Tuesday
+            'W'  => 3,  // Wednesday
+            'TH' => 4,  // Thursday
+            'F'  => 5,  // Friday
+            'S'  => 6,  // Saturday
+        ];
+
         $scheduledDates = [];
         $currentDate = Carbon::parse($startDate);
 

@@ -109,7 +109,7 @@ class DatabaseSeeder extends Seeder
 
         $faker = Faker::create();
 
-        for ($i = 1; $i <= 500; $i++) {
+        for ($i = 1; $i <= 100; $i++) {
             Visitor::create([
                 'card_id' => strtoupper('VIS'. bin2hex(random_bytes(5))),
                 'name' => $faker->firstName.' '.$faker->lastName,
@@ -119,7 +119,6 @@ class DatabaseSeeder extends Seeder
             ]);
         }
         
-
         $events = [
             ["name" => "Event 1", "date" => Carbon::create(2025, 1, 14)],
             ["name" => "Event 2", "date" => Carbon::create(2025, 1, 15)],
@@ -151,7 +150,7 @@ class DatabaseSeeder extends Seeder
         $dayKeys = array_keys($dayMap); // Get only the keys like ['M', 'T', 'W', 'TH', 'F', 'S']
 
         // Create 500 Students
-        for ($i = 1; $i <= 100; $i++) {
+        for ($i = 1; $i <= 20; $i++) {
             $scheduleCount = rand(3, 5); // Ensure at least 3 and at most 5 days
             $schedule = $faker->randomElements($dayKeys, $scheduleCount); // Select random days
 
@@ -180,7 +179,7 @@ class DatabaseSeeder extends Seeder
             ->toArray();
 
         // Define the date range
-        $startDate = Carbon::create(2024, 10, 1);
+        $startDate = Carbon::create(2025, 01, 1);
         $endDate = Carbon::create(2025, 2, 28);
 
         // Day map for checking attendance days
@@ -195,20 +194,31 @@ class DatabaseSeeder extends Seeder
 
         // Track absences per student per week
         $weeklyAbsences = [];
-
+       
         while ($startDate->lte($endDate)) {
+            // Check if the current date is in the events array
+            $isEventDay = collect($events)->contains(function ($event) use ($startDate) {
+                return $event['date']->isSameDay($startDate);
+            });
+        
+            // Skip the current date if it's an event day
+            if ($isEventDay) {
+                $startDate->addDay(); // Move to the next day
+                continue;
+            }
+        
             if (!$startDate->isSunday()) {
                 $dayCode = $dayMap[$startDate->dayOfWeek] ?? null; // Get day code (M, T, W, etc.)
-
+        
                 if ($dayCode) {
                     $currentWeek = $startDate
                         ->copy()
                         ->startOfWeek()
                         ->toDateString(); // Identify the week
-
+        
                     foreach ($students as $studentId => $student) {
                         $studentSchedule = $student["schedule"]; // Convert schedule to array
-
+        
                         // If the student is scheduled for this day
                         if (in_array($dayCode, $studentSchedule)) {
                             // Initialize weekly absence tracking
@@ -219,33 +229,32 @@ class DatabaseSeeder extends Seeder
                             ) {
                                 $weeklyAbsences[$studentId][$currentWeek] = 0;
                             }
-
+        
                             // Decide if the student should be absent (only if they haven't been absent this week)
                             $isAbsent =
-                                $weeklyAbsences[$studentId][$currentWeek] ==
-                                    0 && rand(1, 10) > 8; // 20% chance
-
+                                $weeklyAbsences[$studentId][$currentWeek] == 0 && rand(1, 10) > 8; // 20% chance
+        
                             if ($isAbsent) {
                                 $weeklyAbsences[$studentId][$currentWeek]++; // Mark as absent for this week
                             } else {
                                 // Generate multiple IN and OUT entries per student
                                 $numEntries = rand(2, 4);
                                 $inTimeBase = $startDate->copy()->setHour(8); // Base IN time
-
+        
                                 for ($i = 0; $i < $numEntries; $i++) {
                                     // Ensure IN times are spaced out correctly
                                     $inTime = $inTimeBase
                                         ->copy()
                                         ->addMinutes(rand(0, 30)); // Randomize IN time slightly
-
+        
                                     // Ensure OUT time is always at least 30 minutes after IN time
                                     $outTime = $inTime
                                         ->copy()
                                         ->addMinutes(rand(30, 90)); // OUT time after IN time
-
+        
                                     // Update the inTimeBase for the next iteration, making sure the times don't overlap
                                     $inTimeBase = $outTime->copy(); // The next IN time will be after the current OUT time
-
+        
                                     // Create the "IN" attendance record
                                     StudentAttendance::create([
                                         "student_id" => $studentId,
@@ -253,7 +262,7 @@ class DatabaseSeeder extends Seeder
                                         "created_at" => $inTime,
                                         "updated_at" => $inTime,
                                     ]);
-
+        
                                     // Create the "OUT" attendance record
                                     StudentAttendance::create([
                                         "student_id" => $studentId,
@@ -270,15 +279,5 @@ class DatabaseSeeder extends Seeder
             $startDate->addDay(); // Move to the next day
         }
 
-        // // Create 20 Visitors
-        // for ($i = 1; $i <= 20; $i++) {
-        //     Visitor::create([
-        //         'card_id' => 'CARD' . $faker->unique()->numberBetween(100000, 999999),
-        //         'first_name' => $faker->firstName,
-        //         'last_name' => $faker->lastName,
-        //         'email' => $faker->unique()->safeEmail,
-        //         'phone' => $faker->phoneNumber
-        //     ]);
-        // }
     }
 }
