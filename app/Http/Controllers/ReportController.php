@@ -187,7 +187,7 @@ class ReportController extends Controller
         $semesterQuery = Semester::query();
         $activeSemesterQuery = Semester::where('active', true);
         
-        $level = $student->isBasicEd() ? 'basic' : 'college';
+        $level = $student->isBasicEducation() ? 'basic' : 'college';
         
         $semesters = $semesterQuery->where('level', $level)->get();
         $activeSemester = $activeSemesterQuery->where('level', $level)->first();
@@ -196,7 +196,7 @@ class ReportController extends Controller
         $endDate = $activeSemester->end_date ?? null ;
 
         // Convert student's schedule into an array
-        $scheduleDays = $student->schedule ?? [];
+        $scheduleDays = $student->currentSchedule();
 
         // Fetch holidays within the date range
         $holidays = Holiday::whereBetween('date', [$startDate, $endDate])

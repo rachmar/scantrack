@@ -11,7 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class SendStudentNotificationJob implements ShouldQueue
+class SendMoreThanEightAbsentNotification implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -34,9 +34,10 @@ class SendStudentNotificationJob implements ShouldQueue
      */
     public function handle()
     {
-        $msg = "Good Day! Mr/Ms. ".$this->student->first_name." ".$this->student->last_name." has entered our school premises at ".date("l jS \of F Y h:i A").". You will receive a notification once the student leaves the school premises. Please do not reply.";
-    
+        $msg = "Good Day! Mr/Ms. ".$this->student->first_name." ".$this->student->last_name." has exceeded 7 absences already. Kindly remind the student to avoid the risk of being unofficially dropped from their enrolled subjects this semester.";
+        
         $client = new Client();
+        
         $client->request('POST', 'https://semaphore.co/api/v4/messages',[
             'form_params' =>  [
                 'apikey' => env('SEMAPHORE_API_KEY'),

@@ -68,7 +68,7 @@
                     <span class="ti-calendar"></span> <!-- Changed Icon -->
                 </div>
                 <h5 class="font-16 text-uppercase mt-0 text-white">Student Schedule</h5>
-                <h4 class="font-500">{{$student->schedule()}}</h4>
+                <h4 class="font-500">{{$student->showSchedule()}}</h4>
                 </div>
             </div>
         </div>
@@ -208,7 +208,7 @@
 <script>
    document.addEventListener('DOMContentLoaded', function () {
        var calendarEl = document.getElementById('attendanceCalendar');
-       var selectedDate = @json($startDate) || new Date().toISOString(); 
+       var selectedDate = new Date().toISOString(); 
         // Initialize FullCalendar
         var calendar = new FullCalendar.Calendar(calendarEl, {
            initialView: 'dayGridMonth',

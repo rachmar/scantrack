@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\SendStudentNotificationJob;
+use App\Jobs\SendQrScanNotification;
 use App\Models\Student;
 use App\Models\Visitor;
 use GuzzleHttp\Client;
@@ -38,7 +38,7 @@ class ScanController extends Controller
         $student = Student::where('card_id', $request->code)->first();
 
         if ($student) {
-            SendStudentNotificationJob::dispatch($student);
+            SendQrScanNotification::dispatch($student);
             return response()->json($student);
         }
 

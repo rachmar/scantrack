@@ -34,7 +34,12 @@
                     <tbody>
                         @foreach($semesters as $semester)
                         <tr>
-                            <td>{{$semester->name}}</td>
+                            <td>
+                                {{$semester->name}}
+                                @if ($semester->active)
+                                    <span class="badge bg-success text-white">Active</span>
+                                @endif
+                            </td>
                             <td>{{$semester->start_date}}</td>
                             <td>{{$semester->end_date}}</td>
                             <td>
