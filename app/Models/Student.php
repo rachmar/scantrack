@@ -38,9 +38,13 @@ class Student extends Model
     {
         return $this->first_name.' '.$this->last_name;
     }
-    public function mappedSchedule()
+    public function schedule()
     {
         return implode(' ', $this->schedule);
+    }
+    public function isBasicEd()
+    {   
+        return in_array($this->course->slug, ['CDC JHS', 'SHS']);
     }
 
     /**

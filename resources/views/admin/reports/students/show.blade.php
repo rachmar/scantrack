@@ -13,7 +13,7 @@
                 <select id="semester" class="form-control" name="semester">
                     <option value="">-- Select Semester --</option>
                     @foreach($semesters as $sems)
-                        <option value="{{ $sems->id }}" {{ request('semester') == $sems->id ? 'selected' : '' }}>
+                        <option value="{{ $sems->id }}" {{ (request('semester') ?? $activeSemester->id) == $sems->id ? 'selected' : '' }}>
                             {{ $sems->name }} | {{ $sems->start_date }} - {{ $sems->end_date }}
                         </option>
                     @endforeach
@@ -29,12 +29,11 @@
 @endsection
 
 @section('content')
-@if ($student && $semester)
-<h2 class="mb-4">
-            {{ $semester->name }} | {{ $semester->start_date }} - {{ $semester->end_date }}
-        </h2>
+@if ($student && $activeSemester)
+    <h2 class="mb-4">
+        {{ $activeSemester->name }} | {{ $activeSemester->start_date }} - {{ $activeSemester->end_date }}
+    </h2>
     <div class="row">
-        
     <div class="col-lg-3 d-flex">
         <div class="card mini-stat bg-success text-white flex-fill">
             <div class="card-body">
@@ -69,7 +68,7 @@
                     <span class="ti-calendar"></span> <!-- Changed Icon -->
                 </div>
                 <h5 class="font-16 text-uppercase mt-0 text-white">Student Schedule</h5>
-                <h4 class="font-500">{{$student->mappedSchedule()}}</h4>
+                <h4 class="font-500">{{$student->schedule()}}</h4>
                 </div>
             </div>
         </div>

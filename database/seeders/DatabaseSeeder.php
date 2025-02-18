@@ -53,8 +53,9 @@ class DatabaseSeeder extends Seeder
                 "Bachelor of Science in Medical Technology (BSMT)",
             ],
             "BASIC EDUCATION" => [
-                "Junior High (JuniorHigh)",
-                "Senior High (SeniorHigh)",
+                "Child Development Center [G1-G6] (CDC)",
+                "Junior High School [G7-G10] (JHS)",
+                "Senior High School [G11-G12] (SHS)",
             ],
             "NURSING" => [
                 "Bachelor of Science in Nursing (BSN)",
@@ -90,18 +91,24 @@ class DatabaseSeeder extends Seeder
             'name' => 'AY 2025-2026 1st Semester',
             'start_date' => Carbon::create(2025, 1, 2),
             'end_date' => Carbon::create(2025, 1, 31 ),
+            'level' => 'college',
+            'active' => false,
         ]);
 
         Semester::create([
             'name' => 'AY 2025-2026 2nd Semester',
             'start_date' => Carbon::create(2025, 2, 2),
             'end_date' => Carbon::create(2025, 2, 28 ),
+            'level' => 'college',
+            'active' => true,
         ]);
 
         Semester::create([
             'name' => 'AY 2025-2026 Whole Year',
             'start_date' => Carbon::create(2025, 1, 01),
             'end_date' => Carbon::create(2025, 2, 28 ),
+            'level' => 'basic',
+            'active' => true,
         ]);
 
         $directories = [

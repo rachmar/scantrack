@@ -65,7 +65,6 @@ class ReportController extends Controller
             })
             ->groupBy("students.card_id", "courses.slug", "departments.slug", "courses.name", "departments.name")
             ->get();
-    
 
         // Sum distinct attendance days per department
         $attendanceSummedByDepartment = $distinctAttendanceDaysByDepartmentStudent->groupBy('department_slug')->map(function ($group) {
@@ -183,19 +182,18 @@ class ReportController extends Controller
 
     public function studentReportShow(Request $request, $id)
     {
-        $semesters = Semester::get();
+        $student = Student::with('course.department')->where('id', $id)->first();
 
-        $startDate = null;
-        $endDate = null;
+        $semesterQuery = Semester::query();
+        $activeSemesterQuery = Semester::where('active', true);
+        
+        $level = $student->isBasicEd() ? 'basic' : 'college';
+        
+        $semesters = $semesterQuery->where('level', $level)->get();
+        $activeSemester = $activeSemesterQuery->where('level', $level)->first();
 
-        $semester = Semester::where('id', $request->semester)->first();
-
-        if ($semester) {
-            $startDate = $semester->start_date;
-            $endDate = $semester->end_date;
-        } 
-
-        $student = Student::where('id', $id)->first();
+        $startDate = $activeSemester->start_date ?? null;
+        $endDate = $activeSemester->end_date ?? null ;
 
         // Convert student's schedule into an array
         $scheduleDays = $student->schedule ?? [];
@@ -259,7 +257,7 @@ class ReportController extends Controller
                 "endDate",
                 "absenteeismRate",
                 "semesters",
-                "semester"
+                "activeSemester"
             )
         );
     }

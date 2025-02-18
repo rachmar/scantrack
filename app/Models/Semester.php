@@ -13,5 +13,11 @@ class Semester extends Model
         'name',
         'start_date',
         'end_date',
+        'level',
+        'active'
+    ];
+
+    protected $cast = [
+        'active' => 'boolean',
     ];
 }
