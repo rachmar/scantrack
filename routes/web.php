@@ -28,6 +28,8 @@ Route::group(['middleware' => ['auth', 'auth.roles'], 'roles' => ['admin']], fun
     Route::resource('students', '\App\Http\Controllers\StudentController');
     Route::resource('semesters', '\App\Http\Controllers\SemesterController');
     Route::resource('holidays', '\App\Http\Controllers\HolidayController');
+    Route::resource('absences', '\App\Http\Controllers\AbsenceRecordController');
+
 
 });
 

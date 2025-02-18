@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Student;
+use App\Models\AbsenceRecord;
 use Illuminate\Http\Request;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Illuminate\Support\Facades\Response;
 
-
-class StudentController extends Controller
+class AbsenceRecordController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,9 +13,15 @@ class StudentController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {   
-        $students = Student::orderBy('id', 'DESC')->get();
-        return view("admin.students.index", compact('students'));
+    {
+        $records = AbsenceRecord::with(['student', 'semester'])
+                ->orderBy('student_id')
+                ->orderBy('semester_id')
+                ->orderBy('date')
+                ->get()
+                ->groupBy(['student_id', 'semester_id']);
+
+        return view("admin.absences.index", compact('records'));
     }
 
     /**
@@ -28,7 +31,7 @@ class StudentController extends Controller
      */
     public function create()
     {
-        abort(404);
+        //
     }
 
     /**
@@ -39,8 +42,7 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        abort(404);
-        
+        //
     }
 
     /**
@@ -49,18 +51,9 @@ class StudentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Student $student)
-    {   
-        $filename = $student->fullName().'.svg';
-        $qrcode = QrCode::size(300)
-            ->margin(2) // Adds a white border
-            ->generate($student->card_id);
-        
-        return Response::make($qrcode, 200, [
-            'Content-Type' => 'image/svg+xml',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
-        ]);
-        
+    public function show($id)
+    {
+        //
     }
 
     /**
@@ -71,7 +64,7 @@ class StudentController extends Controller
      */
     public function edit($id)
     {
-        abort(404);
+        //
     }
 
     /**
@@ -83,7 +76,7 @@ class StudentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        abort(404);
+        //
     }
 
     /**
@@ -94,6 +87,6 @@ class StudentController extends Controller
      */
     public function destroy($id)
     {
-        abort(404);
+        //
     }
 }

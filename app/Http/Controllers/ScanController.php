@@ -54,9 +54,4 @@ class ScanController extends Controller
         ], 404);
     }
 
-    private function sendMessageSemaphore(Student $student){
-
-        
-    }
-
 }
