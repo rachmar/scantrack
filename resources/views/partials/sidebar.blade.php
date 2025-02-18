@@ -13,6 +13,16 @@
                   <i class="fas fa-users"></i><span>Students</span>
                </a>
             </li>
+            <li>
+               <a href="/semesters" class="waves-effect {{ request()->is("semesters") || request()->is("/semesters/*") ? "mm active" : "" }}">
+                  <i class="fas fa-users"></i><span>Semesters</span>
+               </a>
+            </li>
+            <li>
+               <a href="/holidays" class="waves-effect {{ request()->is("holidays") || request()->is("/holidays/*") ? "mm active" : "" }}">
+                  <i class="fas fa-users"></i><span>School Events</span>
+               </a>
+            </li>
             <li class="">
                <a href="{{route('reports.visitor.index')}}" class="waves-effect {{ request()->is("reports/visitors") || request()->is("reports/visitors/*") ? "mm active" : "" }}">
                   <i class="fas fa-file-alt"></i><span>Reports - Visitors</span>

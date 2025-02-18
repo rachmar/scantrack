@@ -7,10 +7,10 @@
 
 @section('breadcrumb')
 <div class="col-sm-6">
-    <h4 class="page-title text-left">Students</h4>
+    <h4 class="page-title text-left">School Events</h4>
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="javascript:void(0);">Home</a></li>
-        <li class="breadcrumb-item"><a href="javascript:void(0);">Students</a></li>
+        <li class="breadcrumb-item"><a href="javascript:void(0);">School Events</a></li>
     </ol>
 </div>
 @endsection
@@ -21,27 +21,26 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
+                <a href="{{ route('holidays.create') }}" class="btn btn-primary float-right mb-3">Add School Event</a>
                 <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                     <thead>
                         <tr>
-                            <th>Student ID</th>
                             <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Course</th>
+                            <th>Date</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($students as $student)
+                        @foreach($holidays as $holiday)
                         <tr>
-                            <td>{{$student->card_id}}</td>
-                            <td>{{$student->fullName()}}</td>
-                            <td>{{$student->phone}}</td>
-                            <td>{{$student->email}}</td>
-                            <td>{{$student->course->name ?? 'No Course'}}</td>
+                            <td>{{$holiday->name}}</td>
+                            <td>{{$holiday->date}}</td>
                             <td>
-                                <a href="{{ route('students.show', $student) }}" class="btn btn-success btn-sm edit btn-flat"><i class='fa fa-download'></i> Download QR</a>
+                                <form action="{{ route('holidays.destroy', $holiday->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this event?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
                             </td>
                         </tr>
                         @endforeach
@@ -56,7 +55,6 @@
 @endsection
 
 @section('scripts')
-<!-- Include DataTables JS from the official CDN (version 2.2.1) -->
 <script src="https://cdn.datatables.net/2.2.1/js/dataTables.min.js"></script>
 
 <script>

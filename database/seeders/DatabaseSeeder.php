@@ -9,6 +9,7 @@ use App\Models\Holiday;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Semester;
 use App\Models\Student;
 use App\Models\StudentAttendance;
 use App\Models\Visitor;
@@ -85,6 +86,17 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        Semester::create([
+            'name' => 'AY 1st Semester (COLLEGE) 2025',
+            'start_date' => Carbon::create(2025, 1, 01),
+            'end_date' => Carbon::create(2025, 2, 28 ),
+        ]);
+
+        Semester::create([
+            'name' => 'AY Whole Year (CDC, HS, SHS) 2025',
+            'start_date' => Carbon::create(2025, 1, 01),
+            'end_date' => Carbon::create(2025, 2, 28 ),
+        ]);
 
         $directories = [
             "ADMISSION",

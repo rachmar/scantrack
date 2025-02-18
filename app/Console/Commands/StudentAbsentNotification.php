@@ -102,7 +102,6 @@ class StudentAbsentNotification extends Command
             $currentDate->addDay();
         }
 
-
         return $dateStatuses;
     }
 }
