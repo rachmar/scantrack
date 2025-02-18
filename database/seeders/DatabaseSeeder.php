@@ -87,13 +87,19 @@ class DatabaseSeeder extends Seeder
         }
 
         Semester::create([
-            'name' => 'AY 1st Semester (COLLEGE) 2025',
-            'start_date' => Carbon::create(2025, 1, 01),
+            'name' => 'AY 2025-2026 1st Semester',
+            'start_date' => Carbon::create(2025, 1, 2),
+            'end_date' => Carbon::create(2025, 1, 31 ),
+        ]);
+
+        Semester::create([
+            'name' => 'AY 2025-2026 2nd Semester',
+            'start_date' => Carbon::create(2025, 2, 2),
             'end_date' => Carbon::create(2025, 2, 28 ),
         ]);
 
         Semester::create([
-            'name' => 'AY Whole Year (CDC, HS, SHS) 2025',
+            'name' => 'AY 2025-2026 Whole Year',
             'start_date' => Carbon::create(2025, 1, 01),
             'end_date' => Carbon::create(2025, 2, 28 ),
         ]);

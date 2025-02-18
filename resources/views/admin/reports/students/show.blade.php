@@ -5,19 +5,22 @@
 @section('breadcrumb')
 @if (isset($student->id))
 <div class="col-sm-6 text-left">
+    <h5 class="page-title mb-3">Filters</h5>
     <form method="GET" action="{{ route('reports.students.show', ['id' => $student->id]) }}" class="mb-4">
         <div class="row">
-            <div class="col-md-3">
-                <label for="start_date" class="form-label">Start Date:</label>
-                <input type="date" id="start_date" name="start_date" class="form-control" value="{{ $startDate }}">
+            <div class="col-md-8">
+                <label for="semester" class="form-label">Select Semester:</label>
+                <select id="semester" class="form-control" name="semester">
+                    <option value="">-- Select Semester --</option>
+                    @foreach($semesters as $sems)
+                        <option value="{{ $sems->id }}" {{ request('semester') == $sems->id ? 'selected' : '' }}>
+                            {{ $sems->name }} | {{ $sems->start_date }} - {{ $sems->end_date }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
-            <div class="col-md-3">
-                <label for="end_date" class="form-label">End Date:</label>
-                <input type="date" id="end_date" name="end_date" class="form-control" value="{{ $endDate }}">
-            </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-secondary w-100 mx-1">Filter</button>
-                <a href="javascript:history.back()" class="btn btn-secondary w-100 mx-1"">Go Back</a>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Submit</button>
             </div>
         </div>
     </form>
@@ -26,8 +29,12 @@
 @endsection
 
 @section('content')
-@if (isset($student->id))
+@if ($student && $semester)
+<h2 class="mb-4">
+            {{ $semester->name }} | {{ $semester->start_date }} - {{ $semester->end_date }}
+        </h2>
     <div class="row">
+        
     <div class="col-lg-3 d-flex">
         <div class="card mini-stat bg-success text-white flex-fill">
             <div class="card-body">

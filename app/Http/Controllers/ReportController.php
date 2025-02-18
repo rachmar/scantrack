@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Department;
 use App\Models\Directory;
 use App\Models\Holiday;
+use App\Models\Semester;
 use App\Models\Student;
 use App\Models\Visitor;
 use Illuminate\Http\Request;
@@ -16,11 +17,19 @@ class ReportController extends Controller
 {
     public function courseReportIndex(Request $request)
     {   
+        $semesters = Semester::get();
+
         $departments = Department::get();
 
-        // Get today's date for both start and end date, default to whole month if not provided
-        $startDate = $request->get("start_date", Carbon::today()->startOfMonth()->toDateString());
-        $endDate = $request->get("end_date", Carbon::today()->endOfMonth()->toDateString());
+        $startDate = null;
+        $endDate = null;
+
+        $semester = Semester::where('id', $request->semester)->first();
+
+        if ($semester) {
+            $startDate = $semester->start_date;
+            $endDate = $semester->end_date;
+        } 
 
         $studentsPerDepartment = Department::withCount('students')->get()->mapWithKeys(function ($department) {
             return [$department->slug => $department->students_count];
@@ -113,17 +122,7 @@ class ReportController extends Controller
                 'absenteeism_rate' => round($absenteeismRate, 2),
             ];
         });
-
-
-        // School Days Utilization Report
-        $schoolDaysUtilization = $attendanceSummedByDepartment->map(function ($attendance, $department) use ($totalSchoolDaysPerDepartment) {
-            $utilizationRate = ($attendance / $totalSchoolDaysPerDepartment[$department]) * 100;
-            return [
-                'department' => $department,
-                'attendance' => $attendance,
-                'utilization_rate' => round($utilizationRate, 2),
-            ];
-        });
+        
 
         // Prepare chart data
         $chartData = [
@@ -134,79 +133,67 @@ class ReportController extends Controller
         ];
 
         return view('admin.reports.courses.index', compact(
-            'startDate', 
-            'endDate',
             'attendanceSummedByDepartment',
             'attendanceSummedByCourse',
             'absenteeismReport', 
-            'schoolDaysUtilization',
             'chartData',
             'absenteeismRateCourse', 
-            'departments'
+            'departments',
+            'semesters',
+            'semester'
         ));
     }
 
     public function studentReportIndex(Request $request)
     {
-        $query = Student::query();
-
-        if ($request->filled('name') || $request->filled('course_id')) { // Only execute query if either name or course_id is filled
+        $query = Student::with(['course.department']); // Eager load course and department relationships
+    
+        // Check if there are any filters in the request
+        if ($request->filled('name') || $request->filled('department') || $request->filled('course')) {
+            // Apply filters if 'name' parameter is provided
             if ($request->filled('name')) {
                 $query->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $request->name . '%'])
                     ->orWhereRaw("card_id LIKE ?", ['%' . $request->name . '%']);
             }
-
-            if ($request->filled('course_id')) {
-                $query->where('course_id', $request->course_id);
+    
+            // Apply filters if 'department' parameter is provided
+            if ($request->filled('department')) {
+                $query->whereHas('course', function ($query) use ($request) {
+                    $query->where('department_id', $request->department);
+                });
             }
-
-            $students = $query->get(); // Fetch all results without pagination
+    
+            // Apply filters if 'course' parameter is provided
+            if ($request->filled('course')) {
+                $query->where('course_id', $request->course);
+            }
+    
+            // Fetch filtered students
+            $students = $query->get();
         } else {
+            // Return an empty collection if no filters are provided
             $students = collect();
         }
-
-        $departments = Department::with('courses')->get();
-
-        return view('admin.reports.students.index', compact('students', 'departments'));
-
-    }
     
-    public function visitorReportIndex(Request $request)
-    {   
-        // Get today's date for both start and end date, default to whole month if not provided
-        $startDate = $request->get("start_date", Carbon::today()->startOfMonth()->toDateString());
-        $endDate = $request->get("end_date", Carbon::today()->endOfMonth()->toDateString());
-
-        $visitorPerDirectories = Directory::withCount([
-            'visitors' => function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            }
-        ])->get()->mapWithKeys(function ($directory) {
-            return [$directory->name => $directory->visitors_count];
-        });
-
-        // Prepare chart data
-        $chartData = [
-            'visitorPerDirectoryLabels' => $visitorPerDirectories->keys()->toArray(),
-            'visitorPerDirectoryValues' => $visitorPerDirectories->values()->toArray(),
-        ];
-
-        return view(
-            "admin.reports.visitors.index",
-            compact(
-                "startDate",
-                "endDate",
-                "visitorPerDirectories",
-                "chartData"
-            )
-        );
+        // Get all departments with their associated courses (not filtered by request here)
+        $departments = Department::with('courses')->get();
+    
+        return view('admin.reports.students.index', compact('students', 'departments'));
     }
 
     public function studentReportShow(Request $request, $id)
     {
-        // Get today's date for both start and end date, default to whole month if not provided
-        $startDate = $request->get("start_date", Carbon::today()->startOfMonth()->toDateString());
-        $endDate = $request->get("end_date", Carbon::today()->endOfMonth()->toDateString());
+        $semesters = Semester::get();
+
+        $startDate = null;
+        $endDate = null;
+
+        $semester = Semester::where('id', $request->semester)->first();
+
+        if ($semester) {
+            $startDate = $semester->start_date;
+            $endDate = $semester->end_date;
+        } 
 
         $student = Student::where('id', $id)->first();
 
@@ -270,7 +257,40 @@ class ReportController extends Controller
                 "studentAttendanceTable",
                 "startDate",
                 "endDate",
-                "absenteeismRate"
+                "absenteeismRate",
+                "semesters",
+                "semester"
+            )
+        );
+    }
+     
+    public function visitorReportIndex(Request $request)
+    {   
+        // Get today's date for both start and end date, default to whole month if not provided
+        $startDate = $request->get("start_date", Carbon::today()->startOfMonth()->toDateString());
+        $endDate = $request->get("end_date", Carbon::today()->endOfMonth()->toDateString());
+
+        $visitorPerDirectories = Directory::withCount([
+            'visitors' => function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            }
+        ])->get()->mapWithKeys(function ($directory) {
+            return [$directory->name => $directory->visitors_count];
+        });
+
+        // Prepare chart data
+        $chartData = [
+            'visitorPerDirectoryLabels' => $visitorPerDirectories->keys()->toArray(),
+            'visitorPerDirectoryValues' => $visitorPerDirectories->values()->toArray(),
+        ];
+
+        return view(
+            "admin.reports.visitors.index",
+            compact(
+                "startDate",
+                "endDate",
+                "visitorPerDirectories",
+                "chartData"
             )
         );
     }
