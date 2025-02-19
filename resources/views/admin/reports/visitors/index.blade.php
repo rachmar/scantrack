@@ -53,22 +53,10 @@
 
 <div class="row">
 
-    <!-- Absenteeism Rate per Department Chart -->
     <div class="col-6">
         <div class="card bg-light">
             <div class="card-body">
-                <h4 class="mb-2">Visitor Directory Attendance Pie</h4>
-                <p class="text-muted mb-4">This chart depicts the rate per visitor, offering a clear view of trends across different visitors. It helps to identify areas where attendance issues may need to be addressed.</p>
-                <canvas id="visitorAttendancePie"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Course Attendance Chart -->
-    <div class="col-6">
-        <div class="card bg-light">
-            <div class="card-body">
-                <h4 class="mb-2">Visitor Directory Attendance Graph</h4>
+                <h4 class="mb-2">Visitor Directory Attendance</h4>
                 <p class="text-muted mb-4">TThis chart visualizes the attendance distribution by visitor, giving insights into visitor presence across various categories. It helps assess the participation levels for each category during the current period.</p>
                 <canvas id="visitorAttendanceChart"></canvas>
             </div>
@@ -109,33 +97,6 @@
             responsive: true,
             hover: {
                 mode: null
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    var ctx2 = document.getElementById('visitorAttendancePie').getContext('2d');
-    var courseAttendanceChart = new Chart(ctx2, {
-        type: 'pie',
-        data: {
-            labels: {!! json_encode($chartData['visitorPerDirectoryLabels']) !!},
-            datasets: [{
-                label: 'Distinct Attendance Days per Course',
-                data: {!! json_encode($chartData['visitorPerDirectoryValues']) !!},
-                backgroundColor: function() {
-                    const color = getRandomColor();
-                    return color;
-                }              
-            }]
-        },
-        options: {
-            responsive: true,
-            hover: {
-                mode: null 
             },
             scales: {
                 y: {

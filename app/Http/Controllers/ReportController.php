@@ -185,12 +185,20 @@ class ReportController extends Controller
         $student = Student::with('course.department')->where('id', $id)->first();
 
         $semesterQuery = Semester::query();
-        $activeSemesterQuery = Semester::where('active', true);
+
+        if ($request->semester) {
+            $activeSemesterQuery = Semester::where('id', $request->semester);
+        }else{
+            $activeSemesterQuery = Semester::where('active', true);
+        }
         
         $level = $student->isBasicEducation() ? 'basic' : 'college';
         
         $semesters = $semesterQuery->where('level', $level)->get();
+
+        
         $activeSemester = $activeSemesterQuery->where('level', $level)->first();
+
 
         $startDate = $activeSemester->start_date ?? null;
         $endDate = $activeSemester->end_date ?? null ;

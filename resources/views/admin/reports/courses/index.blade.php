@@ -214,7 +214,7 @@
     // Absenteeism Rate per Department Chart
     var ctx3 = document.getElementById('absenteeismRateChart').getContext('2d');
     var absenteeismRateChart = new Chart(ctx3, {
-        type: 'pie',
+        type: 'bar',
         data: {
             labels: {!! json_encode($absenteeismReport->pluck('department')->toArray()) !!},  // Department Names
             datasets: [{
@@ -242,7 +242,7 @@
 
     var ctx5 = document.getElementById('absenteeismRateCourseChart').getContext('2d');
     var absenteeismRateCourseChart = new Chart(ctx5, {
-        type: 'pie',
+        type: 'bar',
         data: {
             labels: {!! json_encode($absenteeismRateCourse->pluck('course')->toArray()) !!},  // Department Names
             datasets: [{

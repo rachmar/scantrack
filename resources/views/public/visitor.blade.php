@@ -1,35 +1,32 @@
 @extends('layouts.welcome')
 
 @section('styles')
+<style>
+    .logo-container {
+        text-align: center;
+    }
+    .logo-container img {
+        max-width: 150px;
+    }
+</style>
 @endsection
 
 @section('content')
 <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
     <div class="col-md-6">
         
-        @if ($qrCode && $visitor)
-
-            <div class="d-flex justify-content-center">
-                {!! $qrCode !!}
-            </div>
-            <div class="d-flex justify-content-center mt-4">
-                <a href="data:image/svg+xml;base64,{{ base64_encode($qrCode) }}" download="{{$visitor->card_id}} {{$visitor->name}}.svg" class="btn btn-success">
-                    Download QR Code
-                </a>
-            </div>
-            <div class="d-flex justify-content-center mt-4">
-                <a href="{{ route('public.visitor.index') }}" class="btn btn-primary">
-                     Back To Menu
-                </a>
-            </div>
-        
-        @else
-
-        <h3 class="text-center mb-4">Visitor Registration Form</h3>
-
-        <div class="alert alert-info" role="alert">
-            Please fill out the form below. After submission, a QR code will be generated for entry to the school premises.
+        <!-- Logo -->
+        <div class="logo-container mb-3">
+            <img src="{{ URL::asset('assets/images/logo.png ') }}" alt="School Logo">
         </div>
+
+
+        @if(session('success'))
+            <div class="alert alert-success" role="alert">
+                {{ session('success') }}
+            </div>
+        @endif
+        <h3 class="text-center my-4">Visitor Registration Form</h3>
 
         @if($errors->any())
             <div class="alert alert-danger" role="alert">
@@ -68,8 +65,6 @@
             </div>
             <button type="submit" class="btn btn-primary btn-block">Submit</button>
         </form>
-
-        @endif
 
     </div>
 </div>

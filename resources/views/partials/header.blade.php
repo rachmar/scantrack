@@ -2,10 +2,10 @@
    <div class="topbar-left">
       <a href="/" class="logo">
          <span>
-            <h1 style="color: white; ">AMS</h1>
+            <h1 style="color: white; " class="text-small">BC</h1>
          </span>
          <i>
-            <h1>A</h1>
+            <h1>BC</h1>
          </i>
       </a>
    </div>

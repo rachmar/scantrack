@@ -16,19 +16,11 @@ class VisitorController extends Controller
      */
     public function index(Request $request)
     {   
-        $qrCode = null;
-
         $directories = Directory::get(); 
 
         $visitor = Visitor::where('card_id', $request->visitor)->first();
 
-        if ($visitor) {
-            $qrCode = QrCode::size(300)
-            ->margin(2) // Adds a white border
-            ->generate($visitor->card_id);
-        }
-
-        return view("public.visitor", compact('directories', 'qrCode', 'visitor'));
+        return view("public.visitor", compact('directories', 'visitor'));
     }
 
     /**
@@ -66,9 +58,8 @@ class VisitorController extends Controller
             'purpose' => $validated['purpose'],
         ]);
 
-        return redirect()->route('public.visitor.index', [
-            'visitor' => $visitor->card_id,
-        ]);
+        return redirect()->route('public.visitor.index')->with('success', 'Visitor registration successful! Please notify the guard at the post');
+
     }
 
     
