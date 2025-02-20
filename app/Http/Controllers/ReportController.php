@@ -269,7 +269,7 @@ class ReportController extends Controller
             )
         );
     }
-     
+
     public function visitorReportIndex(Request $request)
     {   
         // Get today's date for both start and end date, default to whole month if not provided
@@ -297,6 +297,29 @@ class ReportController extends Controller
                 "endDate",
                 "visitorPerDirectories",
                 "chartData"
+            )
+        );
+    }
+
+    public function visitorReportShow(Request $request, $id)
+    {
+        // Get today's date for both start and end date, default to whole month if not provided
+        $startDate = $request->get("start_date", Carbon::today()->startOfMonth()->toDateString());
+        $endDate = $request->get("end_date", Carbon::today()->endOfMonth()->toDateString());
+
+        $visitors = Visitor::whereBetween('created_at', [$startDate, $endDate])
+        ->whereHas('directory', function ($query) use ($id) {
+            $query->where('slug', $id);
+        })
+        ->with('directory')
+        ->get();
+    
+        return view(
+            "admin.reports.visitors.show",
+            compact(
+                "startDate",
+                "endDate",
+                "visitors",
             )
         );
     }

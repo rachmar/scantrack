@@ -176,7 +176,9 @@ class DatabaseSeeder extends Seeder
 
         // Create 500 Students
         for ($i = 1; $i <= 20; $i++) {
+
             $scheduleCount = rand(3, 5); // Ensure at least 3 and at most 5 days
+
             $schedule = $faker->randomElements($dayKeys, $scheduleCount); // Select random days
 
             // Sort schedule based on day order defined in $dayMap
@@ -184,10 +186,16 @@ class DatabaseSeeder extends Seeder
                 return $dayMap[$a] - $dayMap[$b];
             });
 
+            $studCourID = $faker->randomElement($courseIds);
+
+            // if student is basic ed, then assign M TO F schedule
+            if (in_array($studCourID, [9, 10, 11])) {
+                $schedule = ['M', 'T', 'W', 'TH', 'F'];
+            }
+
             Student::create([
-                "card_id" =>
-                    "ST" . $faker->unique()->numberBetween(100000, 999999),
-                "course_id" => $faker->randomElement($courseIds), // Assign random course ID
+                "card_id" =>"ST" . $faker->unique()->numberBetween(100000, 999999),
+                "course_id" => $studCourID, // Assign random course ID
                 "first_name" => $faker->firstName,
                 "last_name" => $faker->lastName,
                 "email" => $faker->unique()->safeEmail,
@@ -198,7 +206,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // Fetch all student IDs with their schedules
-        $students = Student::select("id", "schedule")
+        $students = Student::select("id", "course_id", "schedule")
             ->get()
             ->keyBy("id")
             ->toArray();
@@ -265,6 +273,11 @@ class DatabaseSeeder extends Seeder
                                 // Generate multiple IN and OUT entries per student
                                 $numEntries = rand(2, 4);
                                 $inTimeBase = $startDate->copy()->setHour(8); // Base IN time
+
+                                // if student is basic ed, then 1 entry only
+                                if (in_array($student["course_id"], [9, 10, 11])) {
+                                    $numEntries = 1;
+                                }
         
                                 for ($i = 0; $i < $numEntries; $i++) {
                                     // Ensure IN times are spaced out correctly

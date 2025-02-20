@@ -45,14 +45,14 @@
                   <i class="fas fa-building"></i><span>Reports - Department</span>
             </a>
          </li>
-         
          <li>
             <a href="{{route('absences.index')}}" class="waves-effect {{ request()->is('absences') || request()->is('/absences/*') ? 'mm active' : '' }}">
-                  <i class="fas fa-user-times"></i><span>Absence Records</span>
+               <i class="fas fa-user-times"></i>
+               <span>Absence Records</span>
+               <span class="badge bg-danger ms-2">!</span> <!-- Example count -->
             </a>
          </li>
       </ul>
-
       </div>
       <div class="clearfix"></div>
    </div>

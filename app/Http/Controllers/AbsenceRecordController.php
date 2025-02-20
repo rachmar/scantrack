@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AbsenceRecord;
+use App\Models\Student;
 use Illuminate\Http\Request;
 
 class AbsenceRecordController extends Controller
@@ -14,12 +15,17 @@ class AbsenceRecordController extends Controller
      */
     public function index()
     {
-        $records = AbsenceRecord::with(['student', 'semester'])
-                ->orderBy('student_id')
-                ->orderBy('semester_id')
-                ->orderBy('date')
-                ->get()
-                ->groupBy(['student_id', 'semester_id']);
+        $departmentId = 3; // Change this to the department you want to filter by
+
+        $records = AbsenceRecord::with(['student.course.department', 'semester'])
+            ->whereHas('student.course.department', function ($query) use ($departmentId) {
+                $query->where('id', $departmentId);
+            })
+            ->orderBy('student_id')
+            ->orderBy('semester_id')
+            ->orderBy('date')
+            ->get()
+            ->groupBy(['student_id', 'semester_id']);
 
         return view("admin.absences.index", compact('records'));
     }

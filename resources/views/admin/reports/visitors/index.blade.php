@@ -24,8 +24,6 @@
         </div>
     </form>
 </div>
-
-
 @endsection
 
 @section('content')
@@ -35,24 +33,27 @@
         <p class="text-muted">This section provides a comprehensive overview of visitors by department. It highlights the total number of visitors in each department, helping to evaluate departmental engagement and track visitor trends.</p>
     </div>
     @foreach($visitorPerDirectories as $visitorPerDirectoryKey => $visitorPerDirectoryValue)
-        <div class="col-xl-2 col-md-3 d-flex mb-4">
-            <div class="card mini-stat bg-primary text-white flex-fill">
-                <div class="card-body">
-                    <div class="mb-4">
-                        <div class="float-left mini-stat-img mr-4">
-                            <i class="fas fa-chalkboard-teacher fa-2x"></i>
+        <div class="col-xl-2 col-md-3 d-flex align-items-stretch mb-4">
+            <a href="{{ route('reports.visitor.show', ['id' => $visitorPerDirectoryKey, 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="text-decoration-none w-100">
+                <div class="card mini-stat bg-primary text-white flex-fill h-100">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="mb-4">
+                                <div class="float-left mini-stat-img mr-4">
+                                    <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                                </div>
+                                <h5 class="font-16 text-uppercase mt-0 text-white">{{ $visitorPerDirectoryKey }}</h5>
+                                <h4 class="font-500">{{ $visitorPerDirectoryValue }} visits</h4>
+                            </div>
                         </div>
-                        <h5 class="font-16 text-uppercase mt-0 text-white">{{ $visitorPerDirectoryKey }}</h5>
-                        <h4 class="font-500">{{ $visitorPerDirectoryValue }} visits</h4>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
     @endforeach
 </div>
 
 <div class="row">
-
     <div class="col-6">
         <div class="card bg-light">
             <div class="card-body">

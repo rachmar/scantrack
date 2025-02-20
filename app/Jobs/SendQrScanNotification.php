@@ -34,7 +34,7 @@ class SendQrScanNotification implements ShouldQueue
      */
     public function handle()
     {
-        $msg = "Good Day! Mr/Ms. ".$this->student->first_name." ".$this->student->last_name." has entered our school premises at ".date("l jS \of F Y h:i A").". You will receive a notification once the student leaves the school premises. Please do not reply.";
+        $msg = "Good Day! ".$this->student->first_name." ".$this->student->last_name." has entered our school premises at ".date("l jS \of F Y h:i A").". You will receive a notification once the student leaves the school premises. Please do not reply.";
     
         $client = new Client();
         

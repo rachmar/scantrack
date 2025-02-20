@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\SendConsecutiveAbsentNotification;
-use App\Jobs\SendMoreThanEightAbsentNotification;
+use App\Jobs\SendMoreThanSixAbsentNotification;
 use App\Models\AbsenceRecord;
 use App\Models\Holiday;
 use App\Models\Semester;
@@ -35,7 +35,7 @@ class StudentAbsentNotification extends Command
      */
     public function handle()
     {
-        $students = Student::with('course.department')->whereIn('id', [6, 1])->get();
+        $students = Student::get();
 
         foreach ($students as $student) {
 
@@ -58,7 +58,7 @@ class StudentAbsentNotification extends Command
             
             $studentAbsence = $student->isBasicEducation()
                 ? $this->hasConsecutiveAbsents($studentAttendance)
-                : $this->hasEightOrMoreAbsences($studentAttendance);
+                : $this->hasSixOrMoreAbsences($studentAttendance);
             
             $absense = $this->storeAbsenceRecords($student, $studentActiveSemester, $studentAbsence);
     
@@ -89,9 +89,9 @@ class StudentAbsentNotification extends Command
             ]);
         }
 
-        $studentAbsence = $student->isBasicEducation()
-            ? SendConsecutiveAbsentNotification::dispatch($student)
-            : SendMoreThanEightAbsentNotification::dispatch($student);
+        // $studentAbsence = $student->isBasicEducation()
+        //     ? SendConsecutiveAbsentNotification::dispatch($student)
+        //     : SendMoreThanSixAbsentNotification::dispatch($student);
 
         return 'Absence records updated successfully.';
     }
@@ -106,18 +106,22 @@ class StudentAbsentNotification extends Command
     {
         $absentStreak = 0;
         $absentDates = [];
-
+        
         foreach ($attendanceArray as $date => $status) {
             if ($status === 'ABSENT') {
                 $absentStreak++;
                 $absentDates[] = $date;
+                
+                if ($absentStreak >= 3) {
+                    return ['status' => true, 'dates' => $absentDates];
+                }
             } else {
                 $absentStreak = 0;
                 $absentDates = [];
             }
         }
-
-        return $absentStreak >= 3 ? ['status' => true, 'dates' => $absentDates] : ['status' => false];
+        
+        return ['status' => false];
     }
 
     /**
@@ -126,11 +130,11 @@ class StudentAbsentNotification extends Command
      * @param array $attendanceArray
      * @return array
      */
-    private function hasEightOrMoreAbsences(array $attendanceArray): array
+    private function hasSixOrMoreAbsences(array $attendanceArray): array
     {
         $absentDates = array_keys(array_filter($attendanceArray, fn($status) => $status === 'ABSENT'));
         
-        return count($absentDates) >= 8 ? ['status' => true, 'dates' => $absentDates] : ['status' => false];
+        return count($absentDates) >= 6 ? ['status' => true, 'dates' => $absentDates] : ['status' => false];
     }
 
     /**

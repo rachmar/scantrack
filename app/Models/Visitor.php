@@ -21,4 +21,9 @@ class Visitor extends Model
         'phone',
         'purpose',
     ];
+    
+    public function directory()
+    {
+        return $this->belongsTo(Directory::class);
+    }
 }

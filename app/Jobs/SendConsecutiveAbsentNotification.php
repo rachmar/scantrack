@@ -34,7 +34,7 @@ class SendConsecutiveAbsentNotification implements ShouldQueue
      */
     public function handle()
     {
-        $msg = "Good Day! Mr/Ms. ".$this->student->first_name." ".$this->student->last_name." has been absent for three consecutive days. The student is required to submit a written excuse letter signed by a guardian, along with any supporting documents as evidence for the absence.";
+        $msg = "Good Day! ".$this->student->first_name." ".$this->student->last_name." has been absent for three consecutive days. The student is required to submit a written excuse letter signed by a guardian, along with any supporting documents as evidence for the absence.";
     
         $client = new Client();
         

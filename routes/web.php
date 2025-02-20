@@ -24,6 +24,7 @@ Route::group(['middleware' => ['auth', 'auth.roles'], 'roles' => ['admin']], fun
     Route::get('/reports/students/{id}', '\App\Http\Controllers\ReportController@studentReportShow')->name('reports.students.show');
 
     Route::get('/reports/visitors', '\App\Http\Controllers\ReportController@visitorReportIndex')->name('reports.visitor.index');
+    Route::get('/reports/visitors/{id}', '\App\Http\Controllers\ReportController@visitorReportShow')->name('reports.visitor.show');
 
     Route::resource('students', '\App\Http\Controllers\StudentController');
     Route::resource('semesters', '\App\Http\Controllers\SemesterController');
