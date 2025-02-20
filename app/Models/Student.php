@@ -52,6 +52,12 @@ class Student extends Model
         return $this->schedule ?? [];
     }
 
+    public function absenceRecord()
+    {
+        return $this->hasMany(AbsenceRecord::class)->where('clear', true)
+            ->pluck('id', 'date')->toArray() ?? [];
+    }
+
     /**
      * Get the masked email.
      *

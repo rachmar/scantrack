@@ -301,24 +301,30 @@ class ReportController extends Controller
         );
     }
 
-    public function visitorReportShow(Request $request, $id)
+    public function visitorReportShow(Request $request, $slug)
     {
+
+        $directory = Directory::where('slug', $slug)->first();
+
         // Get today's date for both start and end date, default to whole month if not provided
         $startDate = $request->get("start_date", Carbon::today()->startOfMonth()->toDateString());
         $endDate = $request->get("end_date", Carbon::today()->endOfMonth()->toDateString());
 
         $visitors = Visitor::whereBetween('created_at', [$startDate, $endDate])
-        ->whereHas('directory', function ($query) use ($id) {
-            $query->where('slug', $id);
+        ->whereHas('directory', function ($query) use ($directory) {
+            $query->where('slug', $directory->slug);
         })
         ->with('directory')
         ->get();
+
+
     
         return view(
             "admin.reports.visitors.show",
             compact(
                 "startDate",
                 "endDate",
+                "directory",
                 "visitors",
             )
         );
@@ -328,6 +334,15 @@ class ReportController extends Controller
     {
         $courses = Course::where('department_id', $request->department_id)->get();
         return response()->json($courses);
+    }
+
+    public function getSemesters(Request $request)
+    {
+        $course = Course::where('id', $request->course_id)->first();
+
+        $semesters = Semester::getSemesterByCourse($course);
+
+        return response()->json($semesters);
     }
 
     // Extracted function to get the scheduled dates

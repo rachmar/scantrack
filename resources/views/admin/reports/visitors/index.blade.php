@@ -34,7 +34,7 @@
     </div>
     @foreach($visitorPerDirectories as $visitorPerDirectoryKey => $visitorPerDirectoryValue)
         <div class="col-xl-2 col-md-3 d-flex align-items-stretch mb-4">
-            <a href="{{ route('reports.visitor.show', ['id' => $visitorPerDirectoryKey, 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="text-decoration-none w-100">
+            <a href="{{ route('reports.visitor.show', ['slug' => $visitorPerDirectoryKey, 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="text-decoration-none w-100">
                 <div class="card mini-stat bg-primary text-white flex-fill h-100">
                     <div class="card-body d-flex flex-column justify-content-between">
                         <div>

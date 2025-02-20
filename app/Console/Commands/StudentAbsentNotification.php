@@ -55,7 +55,7 @@ class StudentAbsentNotification extends Command
             }
     
             $studentAttendance = $this->studentAttendanceSheet($student, $studentActiveSemester);
-            
+
             $studentAbsence = $student->isBasicEducation()
                 ? $this->hasConsecutiveAbsents($studentAttendance)
                 : $this->hasSixOrMoreAbsences($studentAttendance);
@@ -106,22 +106,28 @@ class StudentAbsentNotification extends Command
     {
         $absentStreak = 0;
         $absentDates = [];
-        
+        $consecutiveAbsences = [];
+
         foreach ($attendanceArray as $date => $status) {
             if ($status === 'ABSENT') {
                 $absentStreak++;
                 $absentDates[] = $date;
-                
+
                 if ($absentStreak >= 3) {
-                    return ['status' => true, 'dates' => $absentDates];
+                    $consecutiveAbsences = array_merge($consecutiveAbsences, $absentDates);
                 }
             } else {
                 $absentStreak = 0;
                 $absentDates = [];
             }
         }
-        
-        return ['status' => false];
+
+        // Remove duplicates and re-index the array
+        $consecutiveAbsences = array_values(array_unique($consecutiveAbsences));
+
+        return !empty($consecutiveAbsences) 
+            ? ['status' => true, 'dates' => $consecutiveAbsences] 
+            : ['status' => false];
     }
 
     /**
@@ -155,8 +161,11 @@ class StudentAbsentNotification extends Command
             ->whereBetween('created_at', [$startDate, $endDate]);
         
         $studentAttendance = $this->studentPresentAttendance($attendanceQuery, $holidays);
-        
+
+        $studentAbsenceRecord = $student->absenceRecord();
+
         $dateStatuses = [];
+
         $dayMap = ['M' => 1, 'T' => 2, 'W' => 3, 'TH' => 4, 'F' => 5, 'S' => 6];
         
         while ($startDate->lte($endDate)) {
@@ -165,6 +174,8 @@ class StudentAbsentNotification extends Command
 
             if (isset($holidays[$dateString])) {
                 $dateStatuses[$dateString] = 'EVENT';
+            }elseif (isset($studentAbsenceRecord[$dateString])) {
+                $dateStatuses[$dateString] = 'CLEAR';
             } elseif (in_array(array_search($dayNumber, $dayMap), $scheduleDays)) {
                 $dateStatuses[$dateString] = isset($studentAttendance[$dateString]) ? 'PRESENT' : 'ABSENT';
             }

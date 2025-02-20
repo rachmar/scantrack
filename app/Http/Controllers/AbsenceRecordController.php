@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\AbsenceRecord;
+use App\Models\Department;
+use App\Models\Semester;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
@@ -13,13 +15,25 @@ class AbsenceRecordController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        $departmentId = 3; // Change this to the department you want to filter by
+    public function index(Request $request)
+    {   
+        $semesters = Semester::get();
+
+        $departments = Department::get();
+
+        $departmentId = $request->input('department'); // Get department ID from request (optional)
+        $courseId = $request->input('course'); // Get department ID from request (optional)
 
         $records = AbsenceRecord::with(['student.course.department', 'semester'])
-            ->whereHas('student.course.department', function ($query) use ($departmentId) {
-                $query->where('id', $departmentId);
+            ->when($departmentId, function ($query) use ($departmentId) {
+                $query->whereHas('student.course.department', function ($q) use ($departmentId) {
+                    $q->where('id', $departmentId);
+                });
+            })
+            ->when($courseId, function ($query) use ($courseId) {
+                $query->whereHas('student.course', function ($q) use ($courseId) {
+                    $q->where('id', $courseId);
+                });
             })
             ->orderBy('student_id')
             ->orderBy('semester_id')
@@ -27,7 +41,7 @@ class AbsenceRecordController extends Controller
             ->get()
             ->groupBy(['student_id', 'semester_id']);
 
-        return view("admin.absences.index", compact('records'));
+        return view("admin.absences.index", compact('records', 'semesters', 'departments'));
     }
 
     /**
@@ -93,6 +107,12 @@ class AbsenceRecordController extends Controller
      */
     public function destroy($id)
     {
-        //
+        AbsenceRecord::where('student_id', $id)
+            ->where('clear', false)
+            ->update([
+                'clear' => true
+            ]);
+
+        return redirect()->route('absences.index');
     }
 }

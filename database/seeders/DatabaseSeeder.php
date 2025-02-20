@@ -104,7 +104,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Semester::create([
-            'name' => 'AY 2025-2026 Whole Year',
+            'name' => 'AY 2025-2026 Academic Year',
             'start_date' => Carbon::create(2025, 1, 01),
             'end_date' => Carbon::create(2025, 2, 28 ),
             'level' => 'basic',
